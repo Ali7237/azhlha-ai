@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>أزهلها — مساعدك الذكي</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<!-- ══ LOGIN SCREEN ══ -->
+<div class="login-screen" id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="login-logo-icon">أ</div>
+      <div class="login-logo-text">أزهلها</div>
+    </div>
+    <h1 class="login-title">مرحباً بك 👋</h1>
+    <p class="login-sub">مساعدك الذكي — يساعدك في أي شيء</p>
+
+    <!-- Google Sign-In Button الحقيقي -->
+    <div id="g_id_onload"
+         data-client_id="782373073808-6t3mfqmpir1q94g4sq85ldrtaoav7uhg.apps.googleusercontent.com"
+         data-callback="handleGoogleLogin"
+         data-auto_prompt="false">
+    </div>
+    <div class="g_id_signin google-btn-wrap"
+         data-type="standard"
+         data-shape="rectangular"
+         data-theme="filled_black"
+         data-text="signin_with"
+         data-size="large"
+         data-logo_alignment="left"
+         data-locale="ar"
+         data-width="320">
+    </div>
+
+    <div class="login-divider">أو</div>
+
+    <button class="guest-btn" onclick="loginAsGuest()">
+      تصفح كزائر بدون حساب
+    </button>
+
+    <p class="login-note">حسابك Google يُستخدم فقط لحفظ محادثاتك</p>
+  </div>
+</div>
+
+<!-- ══ APP ══ -->
+<div class="app" id="app" style="display:none">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-top">
+      <div class="sidebar-brand">
+        <div class="brand-icon">أ</div>
+        <div class="brand-name">أزهلها</div>
+      </div>
+      <button class="sidebar-close" onclick="toggleSidebar()">✕</button>
+    </div>
+
+    <button class="new-chat-btn" onclick="newChat()">
+      <span class="plus-icon">+</span>
+      محادثة جديدة
+    </button>
+
+    <div class="sidebar-label">اقتراحات</div>
+    <div class="quick-list">
+      <button class="quick-item" onclick="quickSend('وش تقدر تسويلي؟')">🤖 وش تقدر تسوي؟</button>
+      <button class="quick-item" onclick="quickSend('اكتب لي قصيدة نبطية عن الغربة')">✍️ قصيدة نبطية</button>
+      <button class="quick-item" onclick="quickSend('علمني البرمجة من الصفر')">💻 تعليم البرمجة</button>
+      <button class="quick-item" onclick="quickSend('ساعدني أكتب CV احترافي')">📄 كتابة CV</button>
+      <button class="quick-item" onclick="quickSend('وش أفضل طريقة أتعلم الإنجليزي؟')">🌍 تعلم الإنجليزي</button>
+      <button class="quick-item" onclick="quickSend('حلل هذه الصورة وقولي وش فيها')">🖼️ تحليل صورة</button>
+      <button class="quick-item" onclick="quickSend('اكتب لي بريد إلكتروني رسمي')">✉️ بريد إلكتروني</button>
+      <button class="quick-item" onclick="quickSend('ترجم لي هذا النص للإنجليزي')">🔄 ترجمة</button>
+    </div>
+
+    <div class="sidebar-label">المحادثات</div>
+    <div class="history-list" id="history-list">
+      <div class="history-empty">ما في محادثات بعد</div>
+    </div>
+
+    <!-- USER -->
+    <div class="sidebar-user" id="sidebar-user">
+      <div class="user-avatar" id="user-avatar">ز</div>
+      <div class="user-info">
+        <div class="user-name" id="user-name">زائر</div>
+        <div class="user-status" id="user-status">تصفح كزائر</div>
+      </div>
+      <button class="settings-btn" onclick="openSettings()" title="الإعدادات">⚙️</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main" id="main">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+      <div class="topbar-center">
+        <div class="brand-name sm">أزهلها</div>
+      </div>
+      <button class="topbar-settings" onclick="openSettings()">⚙️</button>
+    </header>
+
+    <!-- MESSAGES -->
+    <div class="messages-wrap" id="messages-wrap">
+
+      <!-- WELCOME -->
+      <div class="welcome" id="welcome">
+        <div class="welcome-avatar">أ</div>
+        <h1 class="welcome-title">هلا! أنا <span>أزهلها</span> 👋</h1>
+        <p class="welcome-sub">مساعدك الذكي — اسألني أي شيء وأزهلها لك</p>
+        <div class="welcome-grid">
+          <div class="wcard" onclick="quickSend('وش تقدر تسوي لي؟')">
+            <span class="wcard-icon">🤖</span>
+            <span class="wcard-text">اعرف قدراتي</span>
+          </div>
+          <div class="wcard" onclick="quickSend('ساعدني في كتابة رسالة')">
+            <span class="wcard-icon">✍️</span>
+            <span class="wcard-text">كتابة وتحرير</span>
+          </div>
+          <div class="wcard" onclick="quickSend('ساعدني في حل مشكلة برمجية')">
+            <span class="wcard-icon">💻</span>
+            <span class="wcard-text">برمجة وتقنية</span>
+          </div>
+          <div class="wcard" onclick="document.getElementById('img-input').click()">
+            <span class="wcard-icon">🖼️</span>
+            <span class="wcard-text">تحليل صورة</span>
+          </div>
+          <div class="wcard" onclick="quickSend('لخص لي هذا الموضوع')">
+            <span class="wcard-icon">📝</span>
+            <span class="wcard-text">تلخيص</span>
+          </div>
+          <div class="wcard" onclick="quickSend('ترجم لي هذا النص')">
+            <span class="wcard-icon">🌐</span>
+            <span class="wcard-text">ترجمة</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="messages" id="messages"></div>
+    </div>
+
+    <!-- IMAGE PREVIEW -->
+    <div class="img-bar" id="img-bar" style="display:none">
+      <img id="img-thumb" alt=""/>
+      <span id="img-name"></span>
+      <button onclick="removeImage()">✕</button>
+    </div>
+
+    <!-- INPUT -->
+    <div class="input-area">
+      <input type="file" id="img-input" accept="image/*" style="display:none" onchange="handleImage(event)"/>
+      <div class="input-box" id="input-box">
+        <button class="attach-btn" onclick="document.getElementById('img-input').click()" title="إرفاق صورة">📎</button>
+        <textarea
+          id="user-input"
+          placeholder="اكتب سؤالك هنا..."
+          rows="1"
+          onkeydown="handleKey(event)"
+          oninput="autoResize(this)"
+        ></textarea>
+        <button class="send-btn" id="send-btn" onclick="sendMessage()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+        </button>
+      </div>
+      <div class="input-hint">أزهلها قد يغلط أحياناً — تحقق من المعلومات المهمة</div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ══ SETTINGS PANEL ══ -->
+<div class="settings-overlay" id="settings-overlay" style="display:none" onclick="closeSettingsOutside(event)">
+  <div class="settings-panel" id="settings-panel">
+    <div class="settings-header">
+      <div class="settings-title">⚙️ الإعدادات</div>
+      <button class="settings-close" onclick="closeSettings()">✕</button>
+    </div>
+
+    <div class="settings-body">
+
+      <!-- الحساب -->
+      <div class="settings-section">
+        <div class="section-label">الحساب</div>
+        <div class="account-card" id="account-card">
+          <div class="acc-avatar" id="acc-avatar">ز</div>
+          <div class="acc-info">
+            <div class="acc-name" id="acc-name">زائر</div>
+            <div class="acc-email" id="acc-email">بدون حساب</div>
+          </div>
+          <button class="acc-btn" id="acc-btn" onclick="toggleLogin()">دخول</button>
+        </div>
+      </div>
+
+      <!-- المظهر -->
+      <div class="settings-section">
+        <div class="section-label">المظهر</div>
+        <div class="setting-row">
+          <span>الوضع الداكن</span>
+          <label class="toggle">
+            <input type="checkbox" id="dark-toggle" checked onchange="toggleTheme()"/>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div class="setting-row">
+          <span>لون التمييز</span>
+          <div class="color-picker">
+            <button class="color-opt active" style="background:#a78bfa" data-color="purple" onclick="setAccent(this,'#a78bfa','#7c3aed')"></button>
+            <button class="color-opt" style="background:#34d399" data-color="green"  onclick="setAccent(this,'#34d399','#059669')"></button>
+            <button class="color-opt" style="background:#60a5fa" data-color="blue"   onclick="setAccent(this,'#60a5fa','#2563eb')"></button>
+            <button class="color-opt" style="background:#f472b6" data-color="pink"   onclick="setAccent(this,'#f472b6','#db2777')"></button>
+            <button class="color-opt" style="background:#fbbf24" data-color="gold"   onclick="setAccent(this,'#fbbf24','#d97706')"></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- الشخصية -->
+      <div class="settings-section">
+        <div class="section-label">أسلوب الردود</div>
+        <div class="setting-row">
+          <span>الأسلوب</span>
+          <select id="style-select" onchange="saveStyle()">
+            <option value="saudi" selected>سعودي عامي</option>
+            <option value="formal">فصحى رسمية</option>
+            <option value="casual">عربي بسيط</option>
+          </select>
+        </div>
+        <div class="setting-row">
+          <span>طول الرد</span>
+          <select id="length-select" onchange="saveStyle()">
+            <option value="short">مختصر</option>
+            <option value="medium" selected>متوسط</option>
+            <option value="long">مفصّل</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- المحادثات -->
+      <div class="settings-section">
+        <div class="section-label">المحادثات</div>
+        <div class="setting-row">
+          <span>حفظ المحادثات</span>
+          <label class="toggle">
+            <input type="checkbox" id="save-toggle" checked onchange="saveSetting('saveChats', this.checked)"/>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <button class="danger-btn" onclick="clearAllChats()">🗑️ مسح كل المحادثات</button>
+      </div>
+
+      <!-- عن التطبيق -->
+      <div class="settings-section">
+        <div class="section-label">عن أزهلها</div>
+        <div class="about-card">
+          <div class="about-logo">أ</div>
+          <div>
+            <div class="about-name">أزهلها</div>
+            <div class="about-ver">الإصدار 1.0 · مدعوم بـ Gemini</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="app.js"></script>
+</body>
+</html>
