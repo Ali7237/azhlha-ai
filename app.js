@@ -1,5 +1,5 @@
 // ════════════════════════════════════════
-//  أزهلها — app.js
+//  أزهلها — app.js  v6
 // ════════════════════════════════════════
 
 const STATE = {
@@ -10,9 +10,9 @@ const STATE = {
   isLoading:     false,
   currentChatId: null,
   user:          null,
+  typingInterval: null,
 };
 
-// ── إعدادات محفوظة ──
 const SETTINGS = {
   dark:       true,
   accent:     { color: '#a78bfa', color2: '#7c3aed' },
@@ -43,14 +43,11 @@ function checkAuth() {
   }
 }
 
-// ── Google Sign-In الحقيقي ──
 function handleGoogleLogin(response) {
   try {
-    // فك تشفير JWT token من Google
     const base64 = response.credential.split('.')[1];
     const pad = base64.length % 4 === 0 ? base64 : base64 + '==='.slice(0, 4 - base64.length % 4);
     const payload = JSON.parse(atob(pad.replace(/-/g, '+').replace(/_/g, '/')));
-
     STATE.user = {
       name:  payload.name  || 'مستخدم Google',
       email: payload.email || '',
@@ -62,11 +59,6 @@ function handleGoogleLogin(response) {
   } catch (err) {
     alert('حدث خطأ في تسجيل الدخول: ' + err.message);
   }
-}
-
-// fallback — مو مستخدم بعد الآن
-function loginWithGoogle() {
-  // Google Identity Services يتولى الأمر تلقائياً
 }
 
 function loginAsGuest() {
@@ -88,11 +80,9 @@ function updateUserUI() {
   const initials = name.charAt(0).toUpperCase();
   const photo    = STATE.user.photo;
 
-  // sidebar user
   document.getElementById('user-name').textContent   = name;
   document.getElementById('user-status').textContent = STATE.user.type === 'google' ? STATE.user.email : 'تصفح كزائر';
 
-  // صورة Google الحقيقية
   const sideAvatar = document.getElementById('user-avatar');
   if (photo) {
     sideAvatar.innerHTML = `<img src="${photo}" alt="${name}" style="width:100%;height:100%;border-radius:50%;object-fit:cover"/>`;
@@ -100,7 +90,6 @@ function updateUserUI() {
     sideAvatar.textContent = initials;
   }
 
-  // settings
   document.getElementById('acc-name').textContent  = name;
   document.getElementById('acc-email').textContent = STATE.user.email || 'بدون بريد';
 
@@ -113,9 +102,7 @@ function updateUserUI() {
 
   const accBtn = document.getElementById('acc-btn');
   accBtn.textContent = STATE.user.type === 'guest' ? 'دخول' : 'خروج';
-  if (STATE.user.type !== 'guest') {
-    accBtn.classList.add('logout');
-  }
+  if (STATE.user.type !== 'guest') accBtn.classList.add('logout');
 }
 
 function toggleLogin() {
@@ -147,13 +134,12 @@ async function sendMessage() {
 
   const userMsg = { role: 'user', content: content || 'حلل هذه الصورة' };
   STATE.messages.push(userMsg);
-
   appendUserMsg(content, STATE.imageBase64);
 
   input.value = '';
   autoResize(input);
-  const img64 = STATE.imageBase64;
-  const imgMime = STATE.imageMime;
+  const img64    = STATE.imageBase64;
+  const imgMime  = STATE.imageMime;
   removeImage();
 
   const typingId = showTyping();
@@ -165,24 +151,23 @@ async function sendMessage() {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        messages:    buildMessages(),
+        messages:    STATE.messages,
         imageBase64: img64,
         mimeType:    imgMime,
+        style:       SETTINGS.style,
+        length:      SETTINGS.length,
+        userName:    STATE.user?.name || 'زائر',
       }),
     });
 
-    // اقرأ النص أولاً
     const rawText = await res.text();
     if (!rawText || rawText.trim() === '') {
-      throw new Error('الـ Function ما ردت — تأكد من رفع الملفات الجديدة على Netlify');
+      throw new Error('الـ Function ما ردت — تأكد من رفع الملفات على Netlify');
     }
 
     let data;
-    try {
-      data = JSON.parse(rawText);
-    } catch {
-      throw new Error('رد غير صالح: ' + rawText.slice(0, 100));
-    }
+    try { data = JSON.parse(rawText); }
+    catch { throw new Error('رد غير صالح: ' + rawText.slice(0, 100)); }
 
     if (!res.ok || data.error) throw new Error(data.error || 'خطأ في الاتصال');
 
@@ -190,7 +175,15 @@ async function sendMessage() {
 
     const aiMsg = { role: 'assistant', content: data.reply };
     STATE.messages.push(aiMsg);
-    appendAIMsg(data.reply);
+
+    // عرض الرد مع تأثير الكتابة
+    await appendAIMsgTyping(data.reply);
+
+    // لو فيه ملف، اعرضه
+    if (data.fileData) {
+      appendFileCard(data.fileData);
+    }
+
     saveChat(content);
 
   } catch (err) {
@@ -203,29 +196,6 @@ async function sendMessage() {
   input.focus();
 }
 
-// بناء الرسائل مع تعليمات الأسلوب
-function buildMessages() {
-  const len    = SETTINGS.length;
-  const style  = SETTINGS.style;
-  const lenMap = { short: 'مختصرة', medium: 'متوسطة', long: 'مفصّلة' };
-  const styleMap = {
-    saudi:  'باللهجة السعودية العامية',
-    formal: 'بالعربية الفصحى الرسمية',
-    casual: 'بعربية بسيطة ومفهومة',
-  };
-
-  // أضف تعليمات الأسلوب لأول رسالة
-  const msgs = [...STATE.messages];
-  if (msgs.length >= 1) {
-    msgs[msgs.length - 1] = {
-      ...msgs[msgs.length - 1],
-      content: msgs[msgs.length - 1].content +
-        `\n\n[ملاحظة: رد ${styleMap[style] || ''} وبردود ${lenMap[len] || ''}]`,
-    };
-  }
-  return msgs;
-}
-
 // ══════════════════════════════════════
 //  عرض الرسائل
 // ══════════════════════════════════════
@@ -236,8 +206,13 @@ function appendUserMsg(text, img64) {
   const imgHtml = img64
     ? `<img src="data:image/jpeg;base64,${img64}" class="msg-image" alt="صورة"/>`
     : '';
+  const initial = STATE.user?.name?.charAt(0)?.toUpperCase() || 'أ';
   d.innerHTML = `
-    <div class="msg-av">${STATE.user?.name?.charAt(0) || 'أ'}</div>
+    <div class="msg-av user-av">${
+      STATE.user?.photo
+        ? `<img src="${STATE.user.photo}" style="width:100%;height:100%;border-radius:50%;object-fit:cover"/>`
+        : initial
+    }</div>
     <div class="msg-content">
       ${imgHtml}
       ${text ? `<div class="msg-bubble">${esc(text)}</div>` : ''}
@@ -252,10 +227,129 @@ function appendAIMsg(text) {
   d.className = 'msg ai';
   const html = typeof marked !== 'undefined' ? marked.parse(text) : esc(text).replace(/\n/g, '<br/>');
   d.innerHTML = `
-    <div class="msg-av">أ</div>
-    <div class="msg-content"><div class="msg-bubble">${html}</div></div>`;
+    <div class="msg-av ai-av">أ</div>
+    <div class="msg-content">
+      <div class="msg-bubble">${html}</div>
+      <div class="msg-actions">
+        <button class="action-btn" onclick="copyMsg(this)" title="نسخ">📋</button>
+      </div>
+    </div>`;
+  c.appendChild(d);
+  // highlight code blocks
+  d.querySelectorAll('pre code').forEach(el => {
+    addCopyCodeBtn(el.parentElement);
+  });
+  scrollDown();
+  return d;
+}
+
+// تأثير الكتابة التدريجية
+async function appendAIMsgTyping(text) {
+  const c = document.getElementById('messages');
+  const d = document.createElement('div');
+  d.className = 'msg ai';
+  const initial = 'أ';
+  d.innerHTML = `
+    <div class="msg-av ai-av">${initial}</div>
+    <div class="msg-content">
+      <div class="msg-bubble typing-text"></div>
+      <div class="msg-actions" style="display:none">
+        <button class="action-btn" onclick="copyMsg(this)" title="نسخ">📋</button>
+      </div>
+    </div>`;
   c.appendChild(d);
   scrollDown();
+
+  const bubble = d.querySelector('.msg-bubble');
+  const actions = d.querySelector('.msg-actions');
+
+  // نعرض الـ markdown مباشرة (أسرع وأوضح)
+  const html = typeof marked !== 'undefined' ? marked.parse(text) : esc(text).replace(/\n/g, '<br/>');
+
+  // تأثير fade-in بدل كتابة حرف حرف (أسرع وأنعم)
+  bubble.style.opacity = '0';
+  bubble.innerHTML = html;
+  bubble.style.transition = 'opacity 0.3s ease';
+
+  await new Promise(r => setTimeout(r, 30));
+  bubble.style.opacity = '1';
+  actions.style.display = '';
+
+  // highlight code
+  d.querySelectorAll('pre code').forEach(el => {
+    addCopyCodeBtn(el.parentElement);
+  });
+
+  scrollDown();
+  return d;
+}
+
+function addCopyCodeBtn(preEl) {
+  if (preEl.querySelector('.copy-code-btn')) return;
+  const btn = document.createElement('button');
+  btn.className = 'copy-code-btn';
+  btn.textContent = 'نسخ';
+  btn.onclick = () => {
+    const code = preEl.querySelector('code')?.textContent || '';
+    navigator.clipboard.writeText(code).then(() => {
+      btn.textContent = '✓ تم';
+      setTimeout(() => btn.textContent = 'نسخ', 2000);
+    });
+  };
+  preEl.style.position = 'relative';
+  preEl.appendChild(btn);
+}
+
+function copyMsg(btn) {
+  const bubble = btn.closest('.msg-content').querySelector('.msg-bubble');
+  const text = bubble.innerText || bubble.textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✓';
+    setTimeout(() => btn.textContent = '📋', 2000);
+  });
+}
+
+// بطاقة تحميل الملف
+function appendFileCard(fileData) {
+  const c = document.getElementById('messages');
+  const d = document.createElement('div');
+  d.className = 'msg ai';
+
+  const ext = fileData.name.split('.').pop().toLowerCase();
+  const icons = { txt: '📄', md: '📝', html: '🌐', json: '🔧', csv: '📊', js: '💻', py: '🐍' };
+  const icon = icons[ext] || '📄';
+
+  d.innerHTML = `
+    <div class="msg-av ai-av">أ</div>
+    <div class="msg-content">
+      <div class="file-card">
+        <div class="file-card-icon">${icon}</div>
+        <div class="file-card-info">
+          <div class="file-card-name">${esc(fileData.name)}</div>
+          <div class="file-card-size">${fileData.content.length} حرف</div>
+        </div>
+        <button class="file-card-btn" onclick="downloadFile('${esc(fileData.name)}', \`${btoa(unescape(encodeURIComponent(fileData.content)))}\`)">
+          ⬇️ تحميل
+        </button>
+      </div>
+    </div>`;
+  c.appendChild(d);
+  scrollDown();
+}
+
+function downloadFile(name, b64Content) {
+  try {
+    const content = decodeURIComponent(escape(atob(b64Content)));
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = name;
+    a.click();
+    URL.revokeObjectURL(url);
+  } catch {
+    alert('ما قدرت أحمّل الملف');
+  }
 }
 
 let typingCount = 0;
@@ -265,7 +359,7 @@ function showTyping() {
   const d  = document.createElement('div');
   d.className = 'msg ai'; d.id = id;
   d.innerHTML = `
-    <div class="msg-av">أ</div>
+    <div class="msg-av ai-av">أ</div>
     <div class="msg-content"><div class="msg-bubble">
       <div class="typing"><span></span><span></span><span></span></div>
     </div></div>`;
@@ -357,9 +451,12 @@ function loadHistory() {
   const el    = document.getElementById('history-list');
   if (!chats.length) { el.innerHTML = '<div class="history-empty">ما في محادثات بعد</div>'; return; }
   el.innerHTML = chats.map(c =>
-    `<button class="history-item ${c.id === STATE.currentChatId ? 'active' : ''}" onclick="openChat(${c.id})">
-      💬 ${esc(c.title)}
-    </button>`
+    `<div class="history-item-wrap">
+      <button class="history-item ${c.id === STATE.currentChatId ? 'active' : ''}" onclick="openChat(${c.id})">
+        💬 ${esc(c.title)}
+      </button>
+      <button class="history-del" onclick="deleteChat(${c.id}, event)" title="حذف">✕</button>
+    </div>`
   ).join('');
 }
 
@@ -371,11 +468,19 @@ function openChat(id) {
   document.getElementById('welcome').style.display  = 'none';
   document.getElementById('messages').innerHTML     = '';
   chat.messages.forEach(m => {
-    if (m.role === 'user')      appendUserMsg(m.content, null);
+    if (m.role === 'user')           appendUserMsg(m.content, null);
     else if (m.role === 'assistant') appendAIMsg(m.content);
   });
   loadHistory();
   if (window.innerWidth <= 640) closeSidebar();
+}
+
+function deleteChat(id, e) {
+  e.stopPropagation();
+  const chats = getChats().filter(c => c.id !== id);
+  localStorage.setItem('azhlha_chats', JSON.stringify(chats));
+  if (STATE.currentChatId === id) newChat();
+  loadHistory();
 }
 
 function clearAllChats() {
@@ -389,12 +494,8 @@ function clearAllChats() {
 // ══════════════════════════════════════
 //  الإعدادات
 // ══════════════════════════════════════
-function openSettings() {
-  document.getElementById('settings-overlay').style.display = 'flex';
-}
-function closeSettings() {
-  document.getElementById('settings-overlay').style.display = 'none';
-}
+function openSettings()  { document.getElementById('settings-overlay').style.display = 'flex'; }
+function closeSettings() { document.getElementById('settings-overlay').style.display = 'none'; }
 function closeSettingsOutside(e) {
   if (e.target === document.getElementById('settings-overlay')) closeSettings();
 }
@@ -435,7 +536,6 @@ function loadSettings() {
   if (saved.length)                  SETTINGS.length     = saved.length;
   if (saved.saveChats !== undefined) SETTINGS.saveChats  = saved.saveChats;
 
-  // apply
   if (!SETTINGS.dark) {
     document.documentElement.setAttribute('data-theme', 'light');
     const dt = document.getElementById('dark-toggle');
