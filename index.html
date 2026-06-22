@@ -3,24 +3,21 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>أزهلها — مساعدك الذكي</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet"/>
+<title>آمرني — مساعدك الذكي</title>
 <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
 
-<!-- ══ LOGIN SCREEN ══ -->
+<!-- ══ LOGIN ══ -->
 <div class="login-screen" id="login-screen">
   <div class="login-card">
     <div class="login-logo">
-      <div class="login-logo-icon">أ</div>
-      <div class="login-logo-text">أزهلها</div>
+      <div class="login-logo-icon">آ</div>
+      <div class="login-logo-text">آمرني</div>
     </div>
-    <h1 class="login-title">مرحباً بك 👋</h1>
-    <p class="login-sub">مساعدك الذكي — يساعدك في أي شيء</p>
+    <h1 class="login-title">أهلاً وسهلاً 👋</h1>
+    <p class="login-sub">مساعدك الذكي — اسأل، اكتب، حلّل، وأنشئ ملفات</p>
 
-    <!-- Google Sign-In Button الحقيقي -->
     <div id="g_id_onload"
          data-client_id="782373073808-6t3mfqmpir1q94g4sq85ldrtaoav7uhg.apps.googleusercontent.com"
          data-callback="handleGoogleLogin"
@@ -38,11 +35,7 @@
     </div>
 
     <div class="login-divider">أو</div>
-
-    <button class="guest-btn" onclick="loginAsGuest()">
-      تصفح كزائر بدون حساب
-    </button>
-
+    <button class="guest-btn" onclick="loginAsGuest()">تصفح كزائر بدون حساب</button>
     <p class="login-note">حسابك Google يُستخدم فقط لحفظ محادثاتك</p>
   </div>
 </div>
@@ -54,8 +47,8 @@
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-top">
       <div class="sidebar-brand">
-        <div class="brand-icon">أ</div>
-        <div class="brand-name">أزهلها</div>
+        <div class="brand-icon">آ</div>
+        <div class="brand-name">آمرني</div>
       </div>
       <button class="sidebar-close" onclick="toggleSidebar()">✕</button>
     </div>
@@ -73,9 +66,8 @@
       <button class="quick-item" onclick="quickSend('ساعدني أكتب CV احترافي')">📄 كتابة CV</button>
       <button class="quick-item" onclick="quickSend('وش أفضل طريقة أتعلم الإنجليزي؟')">🌍 تعلم الإنجليزي</button>
       <button class="quick-item" onclick="quickSend('حلل هذه الصورة وقولي وش فيها')">🖼️ تحليل صورة</button>
-      <button class="quick-item" onclick="quickSend('اكتب لي بريد إلكتروني رسمي')">✉️ بريد إلكتروني</button>
-      <button class="quick-item" onclick="quickSend('اكتب لي بريد إلكتروني رسمي')">✉️ بريد إلكتروني</button>
-      <button class="quick-item" onclick="quickSend('اكتب لي كود HTML لصفحة شخصية كملف')">🌐 إنشاء ملف HTML</button>
+      <button class="quick-item" onclick="quickSend('اكتب لي بريد إلكتروني رسمي كملف')">✉️ إنشاء ملف</button>
+      <button class="quick-item" onclick="quickSend('ترجم لي هذا النص للإنجليزي')">🔄 ترجمة</button>
     </div>
 
     <div class="sidebar-label">المحادثات</div>
@@ -83,7 +75,6 @@
       <div class="history-empty">ما في محادثات بعد</div>
     </div>
 
-    <!-- USER -->
     <div class="sidebar-user" id="sidebar-user">
       <div class="user-avatar" id="user-avatar">ز</div>
       <div class="user-info">
@@ -97,70 +88,56 @@
   <!-- MAIN -->
   <main class="main" id="main">
 
-    <!-- TOPBAR -->
     <header class="topbar">
       <button class="menu-btn" onclick="toggleSidebar()">☰</button>
       <div class="topbar-center">
-        <div class="brand-name sm">أزهلها</div>
+        <div class="status-dot"></div>
+        <div class="brand-name sm">آمرني</div>
       </div>
       <button class="topbar-settings" onclick="openSettings()">⚙️</button>
     </header>
 
-    <!-- MESSAGES -->
     <div class="messages-wrap" id="messages-wrap">
-
-      <!-- WELCOME -->
       <div class="welcome" id="welcome">
-        <div class="welcome-avatar">أ</div>
-        <h1 class="welcome-title">هلا! أنا <span>أزهلها</span> 👋</h1>
-        <p class="welcome-sub">مساعدك الذكي — اسألني أي شيء وأزهلها لك</p>
+        <div class="welcome-avatar">آ</div>
+        <h1 class="welcome-title">هلا، أنا <span>آمرني</span> 👋</h1>
+        <p class="welcome-sub">مساعدك الذكي — اسألني أي شيء وأنا هنا</p>
         <div class="welcome-grid">
           <div class="wcard" onclick="quickSend('وش تقدر تسوي لي؟')">
             <span class="wcard-icon">🤖</span>
-            <span class="wcard-text">اعرف قدراتي</span>
+            <span class="wcard-text">قدراتي</span>
           </div>
           <div class="wcard" onclick="quickSend('ساعدني في كتابة رسالة')">
             <span class="wcard-icon">✍️</span>
-            <span class="wcard-text">كتابة وتحرير</span>
+            <span class="wcard-text">كتابة</span>
           </div>
           <div class="wcard" onclick="quickSend('ساعدني في حل مشكلة برمجية')">
             <span class="wcard-icon">💻</span>
-            <span class="wcard-text">برمجة وتقنية</span>
+            <span class="wcard-text">برمجة</span>
           </div>
           <div class="wcard" onclick="document.getElementById('img-input').click()">
             <span class="wcard-icon">🖼️</span>
             <span class="wcard-text">تحليل صورة</span>
           </div>
-          <div class="wcard" onclick="quickSend('لخص لي هذا الموضوع')">
-            <span class="wcard-icon">📝</span>
-            <span class="wcard-text">تلخيص</span>
+          <div class="wcard" onclick="quickSend('اكتب لي ملف HTML لصفحة شخصية')">
+            <span class="wcard-icon">📄</span>
+            <span class="wcard-text">إنشاء ملف</span>
           </div>
           <div class="wcard" onclick="quickSend('ترجم لي هذا النص')">
             <span class="wcard-icon">🌐</span>
             <span class="wcard-text">ترجمة</span>
           </div>
-          <div class="wcard" onclick="quickSend('اكتب لي ملف Python يحسب الأعداد الأولية')">
-            <span class="wcard-icon">📄</span>
-            <span class="wcard-text">إنشاء ملفات</span>
-          </div>
-
-
-
-
         </div>
       </div>
-
       <div class="messages" id="messages"></div>
     </div>
 
-    <!-- IMAGE PREVIEW -->
     <div class="img-bar" id="img-bar" style="display:none">
       <img id="img-thumb" alt=""/>
       <span id="img-name"></span>
       <button onclick="removeImage()">✕</button>
     </div>
 
-    <!-- INPUT -->
     <div class="input-area">
       <input type="file" id="img-input" accept="image/*" style="display:none" onchange="handleImage(event)"/>
       <div class="input-box" id="input-box">
@@ -173,32 +150,30 @@
           oninput="autoResize(this)"
         ></textarea>
         <button class="send-btn" id="send-btn" onclick="sendMessage()">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <line x1="22" y1="2" x2="11" y2="13"></line>
             <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
           </svg>
         </button>
       </div>
-      <div class="input-hint">أزهلها قد يغلط أحياناً — تحقق من المعلومات المهمة</div>
+      <div class="input-hint">آمرني قد يغلط أحياناً — تحقق من المعلومات المهمة</div>
     </div>
 
   </main>
 </div>
 
-<!-- ══ SETTINGS PANEL ══ -->
+<!-- ══ SETTINGS ══ -->
 <div class="settings-overlay" id="settings-overlay" style="display:none" onclick="closeSettingsOutside(event)">
-  <div class="settings-panel" id="settings-panel">
+  <div class="settings-panel">
     <div class="settings-header">
       <div class="settings-title">⚙️ الإعدادات</div>
       <button class="settings-close" onclick="closeSettings()">✕</button>
     </div>
-
     <div class="settings-body">
 
-      <!-- الحساب -->
       <div class="settings-section">
         <div class="section-label">الحساب</div>
-        <div class="account-card" id="account-card">
+        <div class="account-card">
           <div class="acc-avatar" id="acc-avatar">ز</div>
           <div class="acc-info">
             <div class="acc-name" id="acc-name">زائر</div>
@@ -208,7 +183,6 @@
         </div>
       </div>
 
-      <!-- المظهر -->
       <div class="settings-section">
         <div class="section-label">المظهر</div>
         <div class="setting-row">
@@ -221,16 +195,15 @@
         <div class="setting-row">
           <span>لون التمييز</span>
           <div class="color-picker">
-            <button class="color-opt active" style="background:#a78bfa" data-color="purple" onclick="setAccent(this,'#a78bfa','#7c3aed')"></button>
-            <button class="color-opt" style="background:#34d399" data-color="green"  onclick="setAccent(this,'#34d399','#059669')"></button>
-            <button class="color-opt" style="background:#60a5fa" data-color="blue"   onclick="setAccent(this,'#60a5fa','#2563eb')"></button>
-            <button class="color-opt" style="background:#f472b6" data-color="pink"   onclick="setAccent(this,'#f472b6','#db2777')"></button>
-            <button class="color-opt" style="background:#fbbf24" data-color="gold"   onclick="setAccent(this,'#fbbf24','#d97706')"></button>
+            <button class="color-opt active" style="background:#3b82f6" onclick="setAccent(this,'#3b82f6','#1d4ed8')"></button>
+            <button class="color-opt" style="background:#a78bfa" onclick="setAccent(this,'#a78bfa','#7c3aed')"></button>
+            <button class="color-opt" style="background:#34d399" onclick="setAccent(this,'#34d399','#059669')"></button>
+            <button class="color-opt" style="background:#f472b6" onclick="setAccent(this,'#f472b6','#db2777')"></button>
+            <button class="color-opt" style="background:#fbbf24" onclick="setAccent(this,'#fbbf24','#d97706')"></button>
           </div>
         </div>
       </div>
 
-      <!-- الشخصية -->
       <div class="settings-section">
         <div class="section-label">أسلوب الردود</div>
         <div class="setting-row">
@@ -251,7 +224,6 @@
         </div>
       </div>
 
-      <!-- المحادثات -->
       <div class="settings-section">
         <div class="section-label">المحادثات</div>
         <div class="setting-row">
@@ -264,14 +236,13 @@
         <button class="danger-btn" onclick="clearAllChats()">🗑️ مسح كل المحادثات</button>
       </div>
 
-      <!-- عن التطبيق -->
       <div class="settings-section">
-        <div class="section-label">عن أزهلها</div>
+        <div class="section-label">عن التطبيق</div>
         <div class="about-card">
-          <div class="about-logo">أ</div>
+          <div class="about-logo">آ</div>
           <div>
-            <div class="about-name">أزهلها</div>
-            <div class="about-ver">الإصدار 2.0 · مدعوم بـ Gemini 2.0</div>
+            <div class="about-name">آمرني</div>
+            <div class="about-ver">الإصدار 1.0 · مدعوم بـ Gemini 2.0</div>
           </div>
         </div>
       </div>
