@@ -1,5 +1,5 @@
 // ════════════════════════════════════════
-//  أزهلها — app.js  v6
+//  آمرني — app.js  v6
 // ════════════════════════════════════════
 
 const STATE = {
@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
 //  تسجيل الدخول
 // ══════════════════════════════════════
 function checkAuth() {
-  const saved = localStorage.getItem('azhlha_user');
+  const saved = localStorage.getItem('amerni_user');
   if (saved) {
     STATE.user = JSON.parse(saved);
     enterApp();
@@ -54,7 +54,7 @@ function handleGoogleLogin(response) {
       photo: payload.picture || null,
       type:  'google',
     };
-    localStorage.setItem('azhlha_user', JSON.stringify(STATE.user));
+    localStorage.setItem('amerni_user', JSON.stringify(STATE.user));
     enterApp();
   } catch (err) {
     alert('حدث خطأ في تسجيل الدخول: ' + err.message);
@@ -108,7 +108,7 @@ function updateUserUI() {
 function toggleLogin() {
   if (STATE.user?.type === 'google') {
     if (confirm('تبي تخرج من حسابك؟')) {
-      localStorage.removeItem('azhlha_user');
+      localStorage.removeItem('amerni_user');
       STATE.user = null;
       closeSettings();
       document.getElementById('app').style.display = 'none';
@@ -430,7 +430,7 @@ function clearChat() {
 //  المحادثات المحفوظة
 // ══════════════════════════════════════
 function getChats() {
-  try { return JSON.parse(localStorage.getItem('azhlha_chats') || '[]'); } catch { return []; }
+  try { return JSON.parse(localStorage.getItem('amerni_chats') || '[]'); } catch { return []; }
 }
 
 function saveChat(firstMsg) {
@@ -442,7 +442,7 @@ function saveChat(firstMsg) {
   const chat     = { id: STATE.currentChatId, title, messages: STATE.messages, date: new Date().toLocaleDateString('ar') };
   if (existing >= 0) chats[existing] = chat;
   else chats.unshift(chat);
-  localStorage.setItem('azhlha_chats', JSON.stringify(chats.slice(0, 30)));
+  localStorage.setItem('amerni_chats', JSON.stringify(chats.slice(0, 30)));
   loadHistory();
 }
 
@@ -478,14 +478,14 @@ function openChat(id) {
 function deleteChat(id, e) {
   e.stopPropagation();
   const chats = getChats().filter(c => c.id !== id);
-  localStorage.setItem('azhlha_chats', JSON.stringify(chats));
+  localStorage.setItem('amerni_chats', JSON.stringify(chats));
   if (STATE.currentChatId === id) newChat();
   loadHistory();
 }
 
 function clearAllChats() {
   if (!confirm('تأكيد مسح كل المحادثات؟')) return;
-  localStorage.removeItem('azhlha_chats');
+  localStorage.removeItem('amerni_chats');
   newChat();
   loadHistory();
   closeSettings();
@@ -523,13 +523,13 @@ function saveStyle() {
 }
 
 function saveSetting(key, val) {
-  const s = JSON.parse(localStorage.getItem('azhlha_settings') || '{}');
+  const s = JSON.parse(localStorage.getItem('amerni_settings') || '{}');
   s[key] = val;
-  localStorage.setItem('azhlha_settings', JSON.stringify(s));
+  localStorage.setItem('amerni_settings', JSON.stringify(s));
 }
 
 function loadSettings() {
-  const saved = JSON.parse(localStorage.getItem('azhlha_settings') || '{}');
+  const saved = JSON.parse(localStorage.getItem('amerni_settings') || '{}');
   if (saved.dark      !== undefined) SETTINGS.dark      = saved.dark;
   if (saved.accent)                  SETTINGS.accent     = saved.accent;
   if (saved.style)                   SETTINGS.style      = saved.style;
