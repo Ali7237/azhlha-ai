@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>آمرني — مساعدك الذكي</title>
+<title>آمرني</title>
 <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
@@ -12,23 +12,23 @@
 <div class="login-screen" id="login-screen">
   <div class="login-card">
     <div class="login-logo">
-      <div class="login-logo-icon">آ</div>
+      <div class="login-logo-icon">A</div>
       <div class="login-logo-text">آمرني</div>
     </div>
-    <h1 class="login-title">أهلاً وسهلاً 👋</h1>
-    <p class="login-sub">مساعدك الذكي — اسأل، اكتب، حلّل، وأنشئ ملفات</p>
+    <h1 class="login-title">مرحباً بك</h1>
+    <p class="login-sub">مساعدك الذكي للكتابة والتحليل وحل المشكلات</p>
     <div id="g_id_onload"
          data-client_id="782373073808-6t3mfqmpir1q94g4sq85ldrtaoav7uhg.apps.googleusercontent.com"
          data-callback="handleGoogleLogin"
          data-auto_prompt="false"></div>
     <div class="g_id_signin google-btn-wrap"
          data-type="standard" data-shape="rectangular"
-         data-theme="filled_black" data-text="signin_with"
+         data-theme="outline" data-text="signin_with"
          data-size="large" data-logo_alignment="left"
          data-locale="ar" data-width="320"></div>
     <div class="login-divider">أو</div>
-    <button class="guest-btn" onclick="loginAsGuest()">تصفح كزائر بدون حساب</button>
-    <p class="login-note">حسابك Google يُستخدم فقط لحفظ محادثاتك</p>
+    <button class="guest-btn" onclick="loginAsGuest()">المتابعة كزائر</button>
+    <p class="login-note">بتسجيل الدخول توافق على شروط الاستخدام وسياسة الخصوصية</p>
   </div>
 </div>
 
@@ -39,7 +39,7 @@
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-top">
       <div class="sidebar-brand">
-        <div class="brand-icon">آ</div>
+        <div class="brand-icon">A</div>
         <div class="brand-name">آمرني</div>
       </div>
       <button class="sidebar-close" onclick="toggleSidebar()">✕</button>
@@ -51,19 +51,18 @@
 
     <div class="sidebar-label">اقتراحات</div>
     <div class="quick-list">
-      <button class="quick-item" onclick="quickSend('وش تقدر تسويلي؟')">🤖 وش تقدر تسوي؟</button>
+      <button class="quick-item" onclick="quickSend('ما الذي يمكنك مساعدتي به؟')">🤖 ما قدراتك؟</button>
       <button class="quick-item" onclick="quickSend('اكتب لي قصيدة نبطية عن الغربة')">✍️ قصيدة نبطية</button>
-      <button class="quick-item" onclick="quickSend('علمني البرمجة من الصفر')">💻 تعليم البرمجة</button>
-      <button class="quick-item" onclick="quickSend('ساعدني أكتب CV احترافي')">📄 كتابة CV</button>
-      <button class="quick-item" onclick="quickSend('وش أفضل طريقة أتعلم الإنجليزي؟')">🌍 تعلم الإنجليزي</button>
-      <button class="quick-item" onclick="quickSend('حلل هذه الصورة وقولي وش فيها')">🖼️ تحليل صورة</button>
-      <button class="quick-item" onclick="quickSend('اكتب لي بريد إلكتروني رسمي كملف')">✉️ إنشاء ملف</button>
-      <button class="quick-item" onclick="quickSend('ترجم لي هذا النص للإنجليزي')">🔄 ترجمة</button>
+      <button class="quick-item" onclick="quickSend('علمني أساسيات البرمجة')">💻 تعليم البرمجة</button>
+      <button class="quick-item" onclick="quickSend('ساعدني في كتابة سيرة ذاتية احترافية')">📄 سيرة ذاتية</button>
+      <button class="quick-item" onclick="quickSend('ما أفضل طريقة لتعلم اللغة الإنجليزية؟')">🌍 تعلم الإنجليزية</button>
+      <button class="quick-item" onclick="quickSend('ترجم لي النص التالي إلى الإنجليزية:')">🔄 ترجمة</button>
+      <button class="quick-item" onclick="quickSend('اكتب لي كود HTML لصفحة شخصية كملف')">📄 إنشاء ملف</button>
     </div>
 
-    <div class="sidebar-label">المحادثات</div>
+    <div class="sidebar-label">المحادثات السابقة</div>
     <div class="history-list" id="history-list">
-      <div class="history-empty">ما في محادثات بعد</div>
+      <div class="history-empty">لا توجد محادثات سابقة</div>
     </div>
 
     <div class="sidebar-user">
@@ -72,7 +71,7 @@
         <div class="user-name" id="user-name">زائر</div>
         <div class="user-status" id="user-status">تصفح كزائر</div>
       </div>
-      <button class="settings-btn" onclick="openSettings()">⚙️</button>
+      <button class="settings-btn" onclick="openSettings()" title="الإعدادات">⚙️</button>
     </div>
   </aside>
 
@@ -81,63 +80,63 @@
     <header class="topbar">
       <button class="menu-btn" onclick="toggleSidebar()">☰</button>
       <div class="topbar-center">
-        <div class="status-pill">
-          <div class="status-dot"></div>
-          <span class="status-text">آمرني</span>
-        </div>
+        <span class="topbar-name">آمرني</span>
+        <span class="model-badge">Llama 3.3</span>
       </div>
       <button class="topbar-settings" onclick="openSettings()">⚙️</button>
     </header>
 
     <div class="messages-wrap" id="messages-wrap">
       <div class="welcome" id="welcome">
-        <div class="welcome-badge">✦ مدعوم بـ Gemini 2.0</div>
-        <div class="welcome-avatar">آ</div>
-        <h1 class="welcome-title">هلا، أنا <span>آمرني</span></h1>
-        <p class="welcome-sub">مساعدك الذكي — اسألني أي شيء، أحلل صور، أكتب كود، وأنشئ ملفات</p>
+        <div class="welcome-logo">A</div>
+        <h1 class="welcome-title">كيف يمكنني مساعدتك؟</h1>
+        <p class="welcome-sub">اسألني عن أي شيء — أكتب، أحلل، أترجم، أبرمج، وأنشئ ملفات</p>
         <div class="welcome-grid">
-          <div class="wcard" onclick="quickSend('وش تقدر تسوي لي؟')">
-            <span class="wcard-icon">🤖</span><span class="wcard-text">قدراتي</span>
+          <div class="wcard" onclick="quickSend('اشرح لي مفهوم الذكاء الاصطناعي بأسلوب بسيط')">
+            <span class="wcard-icon">🧠</span>
+            <div class="wcard-title">شرح المفاهيم</div>
+            <div class="wcard-sub">اشرح لي مفهوم الذكاء الاصطناعي</div>
           </div>
-          <div class="wcard" onclick="quickSend('ساعدني في كتابة رسالة احترافية')">
-            <span class="wcard-icon">✍️</span><span class="wcard-text">كتابة</span>
+          <div class="wcard" onclick="quickSend('اكتب لي رسالة بريد إلكتروني رسمية')">
+            <span class="wcard-icon">✍️</span>
+            <div class="wcard-title">الكتابة والتحرير</div>
+            <div class="wcard-sub">رسائل، مقالات، تقارير</div>
           </div>
-          <div class="wcard" onclick="quickSend('ساعدني في حل مشكلة برمجية')">
-            <span class="wcard-icon">💻</span><span class="wcard-text">برمجة</span>
+          <div class="wcard" onclick="quickSend('ساعدني في كتابة كود Python لحساب المتوسط الحسابي')">
+            <span class="wcard-icon">💻</span>
+            <div class="wcard-title">البرمجة والكود</div>
+            <div class="wcard-sub">اكتب وصحح الأكواد البرمجية</div>
           </div>
-          <div class="wcard" onclick="document.getElementById('img-input').click()">
-            <span class="wcard-icon">🖼️</span><span class="wcard-text">تحليل صورة</span>
-          </div>
-          <div class="wcard" onclick="quickSend('اكتب لي ملف HTML لصفحة شخصية')">
-            <span class="wcard-icon">📄</span><span class="wcard-text">إنشاء ملف</span>
-          </div>
-          <div class="wcard" onclick="quickSend('ترجم لي هذا النص للإنجليزي')">
-            <span class="wcard-icon">🌐</span><span class="wcard-text">ترجمة</span>
+          <div class="wcard" onclick="quickSend('اكتب لي ملف HTML لصفحة شخصية احترافية')">
+            <span class="wcard-icon">📄</span>
+            <div class="wcard-title">إنشاء الملفات</div>
+            <div class="wcard-sub">ملفات HTML، Python، وغيرها</div>
           </div>
         </div>
       </div>
       <div class="messages" id="messages"></div>
     </div>
 
-    <div class="img-bar" id="img-bar" style="display:none">
-      <img id="img-thumb" alt=""/>
-      <span id="img-name"></span>
-      <button onclick="removeImage()">✕</button>
-    </div>
-
     <div class="input-area">
-      <input type="file" id="img-input" accept="image/*" style="display:none" onchange="handleImage(event)"/>
-      <div class="input-box">
-        <button class="attach-btn" onclick="document.getElementById('img-input').click()" title="إرفاق صورة">📎</button>
-        <textarea id="user-input" placeholder="اكتب سؤالك هنا..." rows="1"
-          onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
-        <button class="send-btn" id="send-btn" onclick="sendMessage()">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
-          </svg>
-        </button>
+      <div class="input-wrap">
+        <div class="img-bar" id="img-bar" style="display:none">
+          <img id="img-thumb" alt=""/>
+          <span id="img-name"></span>
+          <button onclick="removeImage()">✕</button>
+        </div>
+        <input type="file" id="img-input" accept="image/*" style="display:none" onchange="handleImage(event)"/>
+        <div class="input-box">
+          <button class="attach-btn" onclick="document.getElementById('img-input').click()" title="إرفاق صورة">📎</button>
+          <textarea id="user-input" placeholder="اكتب رسالتك..." rows="1"
+            onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+          <button class="send-btn" id="send-btn" onclick="sendMessage()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+          </button>
+        </div>
+        <div class="input-hint">آمرني قد يُخطئ أحياناً — يُرجى التحقق من المعلومات المهمة</div>
       </div>
-      <div class="input-hint">آمرني قد يغلط أحياناً — تحقق من المعلومات المهمة</div>
     </div>
   </main>
 </div>
@@ -159,7 +158,7 @@
             <div class="acc-name" id="acc-name">زائر</div>
             <div class="acc-email" id="acc-email">بدون حساب</div>
           </div>
-          <button class="acc-btn" id="acc-btn" onclick="toggleLogin()">دخول</button>
+          <button class="acc-btn" id="acc-btn" onclick="toggleLogin()">تسجيل الدخول</button>
         </div>
       </div>
 
@@ -168,18 +167,18 @@
         <div class="setting-row">
           <span>الوضع الداكن</span>
           <label class="toggle">
-            <input type="checkbox" id="dark-toggle" checked onchange="toggleTheme()"/>
+            <input type="checkbox" id="dark-toggle" onchange="toggleTheme()"/>
             <span class="toggle-slider"></span>
           </label>
         </div>
         <div class="setting-row">
           <span>لون التمييز</span>
           <div class="color-picker">
-            <button class="color-opt active" style="background:#f59e0b" onclick="setAccent(this,'#f59e0b','#d97706')"></button>
-            <button class="color-opt" style="background:#60a5fa" onclick="setAccent(this,'#60a5fa','#2563eb')"></button>
-            <button class="color-opt" style="background:#a78bfa" onclick="setAccent(this,'#a78bfa','#7c3aed')"></button>
-            <button class="color-opt" style="background:#34d399" onclick="setAccent(this,'#34d399','#059669')"></button>
-            <button class="color-opt" style="background:#f472b6" onclick="setAccent(this,'#f472b6','#db2777')"></button>
+            <button class="color-opt active" style="background:#4f46e5" onclick="setAccent(this,'#4f46e5','#4338ca','rgba(79,70,229,.12)')"></button>
+            <button class="color-opt" style="background:#0ea5e9" onclick="setAccent(this,'#0ea5e9','#0284c7','rgba(14,165,233,.12)')"></button>
+            <button class="color-opt" style="background:#10b981" onclick="setAccent(this,'#10b981','#059669','rgba(16,185,129,.12)')"></button>
+            <button class="color-opt" style="background:#f59e0b" onclick="setAccent(this,'#f59e0b','#d97706','rgba(245,158,11,.12)')"></button>
+            <button class="color-opt" style="background:#ef4444" onclick="setAccent(this,'#ef4444','#dc2626','rgba(239,68,68,.12)')"></button>
           </div>
         </div>
       </div>
@@ -187,10 +186,10 @@
       <div class="settings-section">
         <div class="section-label">أسلوب الردود</div>
         <div class="setting-row">
-          <span>الأسلوب</span>
+          <span>اللغة والأسلوب</span>
           <select id="style-select" onchange="saveStyle()">
-            <option value="saudi" selected>سعودي عامي</option>
-            <option value="formal">فصحى رسمية</option>
+            <option value="formal" selected>فصحى رسمية</option>
+            <option value="saudi">سعودي عامي</option>
             <option value="casual">عربي بسيط</option>
           </select>
         </div>
@@ -198,7 +197,7 @@
           <span>طول الرد</span>
           <select id="length-select" onchange="saveStyle()">
             <option value="short">مختصر</option>
-            <option value="medium" selected>متوسط</option>
+            <option value="medium" selected>متوازن</option>
             <option value="long">مفصّل</option>
           </select>
         </div>
@@ -207,22 +206,22 @@
       <div class="settings-section">
         <div class="section-label">المحادثات</div>
         <div class="setting-row">
-          <span>حفظ المحادثات</span>
+          <span>حفظ المحادثات تلقائياً</span>
           <label class="toggle">
             <input type="checkbox" id="save-toggle" checked onchange="saveSetting('saveChats', this.checked)"/>
             <span class="toggle-slider"></span>
           </label>
         </div>
-        <button class="danger-btn" onclick="clearAllChats()">🗑️ مسح كل المحادثات</button>
+        <button class="danger-btn" onclick="clearAllChats()">حذف جميع المحادثات</button>
       </div>
 
       <div class="settings-section">
         <div class="section-label">عن التطبيق</div>
         <div class="about-card">
-          <div class="about-logo">آ</div>
+          <div class="about-logo">A</div>
           <div>
             <div class="about-name">آمرني</div>
-            <div class="about-ver">الإصدار 2.0 · Gemini 2.0 Flash</div>
+            <div class="about-ver">الإصدار 3.0 · مدعوم بـ Llama 3.3</div>
           </div>
         </div>
       </div>
