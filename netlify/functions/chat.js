@@ -45,7 +45,7 @@ exports.handler = async (event) => {
       long:   `ردودك مفصّلة وشاملة، تشرح بالتفصيل.`,
     };
 
-    const systemPrompt = `أنت أزهلها، مساعد ذكاء اصطناعي سعودي متطور وذكي. اسمك "أزهلها" وما تقول أبداً أنك Gemini أو Google أو أي AI ثاني.
+    const systemPrompt = `أنت آمرني، مساعد ذكاء اصطناعي سعودي متطور وذكي. اسمك "آمرني" وما تقول أبداً أنك Gemini أو Google أو أي AI ثاني.
 
 ${styleInstructions[style] || styleInstructions.saudi}
 ${lengthInstructions[length] || lengthInstructions.medium}
