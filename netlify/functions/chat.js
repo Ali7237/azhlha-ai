@@ -1,3 +1,4 @@
+// netlify/functions/chat.js
 exports.handler = async (event) => {
   const headers = {
     'Access-Control-Allow-Origin':  '*',
@@ -10,97 +11,115 @@ exports.handler = async (event) => {
   if (event.httpMethod !== 'POST')    return { statusCode: 405, headers, body: JSON.stringify({ error: 'Method not allowed' }) };
 
   try {
-    // ── تحقق من المفتاح أولاً ──
+    const body = JSON.parse(event.body || '{}');
+    const { messages, imageBase64, mimeType } = body;
+
+    if (!messages || !messages.length) {
+      return { statusCode: 400, headers, body: JSON.stringify({ error: 'no messages' }) };
+    }
+
     const apiKey = process.env.GEMINI_API_KEY;
+
+    // تحقق من المفتاح
     if (!apiKey) {
       return {
-        statusCode: 200,
+        statusCode: 500,
         headers,
-        body: JSON.stringify({ reply: '⚠️ GEMINI_API_KEY غير موجود في متغيرات البيئة. تأكد من إضافته في Netlify ثم أعد النشر.' }),
+        body: JSON.stringify({ error: 'GEMINI_API_KEY غير موجود في إعدادات Netlify' }),
       };
     }
 
-    // ── قراءة الجسم ──
-    let body;
-    try {
-      body = JSON.parse(event.body || '{}');
-    } catch {
-      return { statusCode: 400, headers, body: JSON.stringify({ error: 'JSON غير صالح' }) };
-    }
-
-    const { messages, imageBase64, mimeType } = body;
-
-    if (!messages?.length) {
-      return { statusCode: 400, headers, body: JSON.stringify({ error: 'ما في رسائل' }) };
-    }
-
     // ── بناء contents مع ضمان تناوب user/model ──
-    const rawContents = messages.map((msg, i) => {
-      const parts = [];
-      if (i === messages.length - 1 && imageBase64) {
-        parts.push({ inline_data: { mime_type: mimeType || 'image/jpeg', data: imageBase64 } });
+    const rawContents = messages.map((msg, index) => {
+      const isLast = index === messages.length - 1;
+      const parts  = [];
+
+      // أضف الصورة في آخر رسالة فقط
+      if (isLast && imageBase64) {
+        parts.push({
+          inline_data: {
+            mime_type: mimeType || 'image/jpeg',
+            data: imageBase64,
+          },
+        });
       }
+
       parts.push({ text: msg.content || ' ' });
-      return { role: msg.role === 'assistant' ? 'model' : 'user', parts };
+
+      return {
+        role:  msg.role === 'assistant' ? 'model' : 'user',
+        parts,
+      };
     });
 
-    // ضمان التناوب
+    // ── ضمان التناوب: لا رسالتان متتاليتان بنفس الـ role ──
     const contents = [];
     for (const msg of rawContents) {
       if (contents.length > 0 && contents[contents.length - 1].role === msg.role) {
+        // دمج مع السابقة
         contents[contents.length - 1].parts.push(...msg.parts);
       } else {
         contents.push(msg);
       }
     }
+
+    // Gemini يجب أن تبدأ بـ user
     if (contents[0]?.role === 'model') contents.shift();
 
-    // ── استدعاء Gemini ──
-    const geminiRes = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+    const systemInstruction = {
+      parts: [{
+        text: `أنت MeAi، مساعد ذكاء اصطناعي ذكي وودود. تجيب دائماً بالعربية ما لم يطلب المستخدم غير ذلك. لا تذكر أنك Gemini أو Google.`,
+      }],
+    };
+
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
       {
-        method: 'POST',
+        method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          system_instruction: {
-            parts: [{ text: `أنت أزهلها، مساعد ذكاء اصطناعي سعودي ذكي. تحكي باللهجة السعودية العامية بشكل طبيعي. لا تقول أنك Gemini أو Google.` }]
-          },
+          system_instruction: systemInstruction,
           contents,
-          generationConfig: { temperature: 0.8, maxOutputTokens: 2048 },
+          generationConfig: {
+            temperature:     0.7,
+            maxOutputTokens: 2048,
+          },
         }),
       }
     );
 
-    // اقرأ الرد كنص أولاً
-    const rawText = await geminiRes.text();
+    const responseText = await response.text();
 
-    if (!geminiRes.ok) {
+    if (!response.ok) {
       return {
-        statusCode: 200,
+        statusCode: 502,
         headers,
-        body: JSON.stringify({ reply: `⚠️ خطأ من Gemini (${geminiRes.status}): ${rawText.slice(0, 200)}` }),
+        body: JSON.stringify({ error: `Gemini API error ${response.status}`, details: responseText }),
       };
     }
 
     let data;
     try {
-      data = JSON.parse(rawText);
+      data = JSON.parse(responseText);
     } catch {
       return {
-        statusCode: 200,
+        statusCode: 502,
         headers,
-        body: JSON.stringify({ reply: `⚠️ رد غير متوقع من Gemini: ${rawText.slice(0, 200)}` }),
+        body: JSON.stringify({ error: 'رد غير صالح من Gemini', details: responseText.slice(0, 200) }),
       };
     }
 
-    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'ما قدرت أرد، حاول مرة ثانية.';
-    return { statusCode: 200, headers, body: JSON.stringify({ reply }) };
+    const result = data.candidates?.[0]?.content?.parts?.[0]?.text
+      || data.error?.message
+      || 'عذراً، لم أتمكن من الرد.';
+
+    return { statusCode: 200, headers, body: JSON.stringify({ reply: result }) };
 
   } catch (err) {
     return {
-      statusCode: 200,
+      statusCode: 500,
       headers,
-      body: JSON.stringify({ reply: `⚠️ خطأ تقني: ${err.message}` }),
+      body: JSON.stringify({ error: err.message }),
     };
   }
 };
