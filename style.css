@@ -622,3 +622,78 @@ textarea#user-input::placeholder { color: var(--muted); }
 @media (min-width: 641px) {
   .sidebar.hidden { position: relative; transform: none; display: none; }
 }
+
+/* ════════════════════════════════════════
+   V6 ADDITIONS
+════════════════════════════════════════ */
+
+/* نسخ الرسالة */
+.msg-actions {
+  display: flex; gap: .4rem; margin-top: .4rem;
+  opacity: 0; transition: opacity .2s;
+}
+.msg:hover .msg-actions { opacity: 1; }
+.action-btn {
+  background: var(--s2); border: 1px solid var(--border);
+  border-radius: 6px; padding: .2rem .5rem;
+  font-size: .75rem; cursor: pointer; color: var(--muted);
+  transition: all .15s;
+}
+.action-btn:hover { background: var(--s3); color: var(--text); }
+
+/* نسخ الكود */
+.copy-code-btn {
+  position: absolute; top: .5rem; left: .5rem;
+  background: var(--s3); border: 1px solid var(--border);
+  border-radius: 5px; padding: .2rem .55rem;
+  font-size: .72rem; cursor: pointer; color: var(--muted);
+  font-family: 'IBM Plex Sans Arabic', sans-serif;
+  transition: all .15s; z-index: 2;
+}
+.copy-code-btn:hover { background: var(--acc); color: #fff; border-color: var(--acc); }
+
+/* بطاقة الملف */
+.file-card {
+  display: flex; align-items: center; gap: .8rem;
+  background: var(--s2); border: 1px solid var(--border);
+  border-radius: var(--r-sm); padding: .8rem 1rem;
+  max-width: 340px;
+}
+.file-card-icon { font-size: 1.6rem; }
+.file-card-info { flex: 1; min-width: 0; }
+.file-card-name {
+  font-size: .88rem; font-weight: 600;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.file-card-size { font-size: .72rem; color: var(--muted); margin-top: 2px; }
+.file-card-btn {
+  background: linear-gradient(135deg, var(--acc2), var(--acc));
+  color: #fff; border: none; border-radius: 8px;
+  padding: .45rem .8rem; font-size: .8rem; cursor: pointer;
+  font-family: 'IBM Plex Sans Arabic', sans-serif;
+  white-space: nowrap; transition: opacity .2s;
+}
+.file-card-btn:hover { opacity: .85; }
+
+/* حذف محادثة */
+.history-item-wrap {
+  display: flex; align-items: center; gap: .3rem;
+  position: relative;
+}
+.history-item-wrap .history-item { flex: 1; }
+.history-del {
+  display: none; background: none; border: none;
+  color: var(--muted); cursor: pointer; padding: .2rem .4rem;
+  border-radius: 5px; font-size: .75rem;
+  transition: color .15s;
+}
+.history-item-wrap:hover .history-del { display: block; }
+.history-del:hover { color: var(--red); }
+
+/* avatar المستخدم */
+.user-av {
+  background: linear-gradient(135deg, #667eea, #764ba2) !important;
+}
+.ai-av {
+  background: linear-gradient(135deg, var(--acc2), var(--acc)) !important;
+}
