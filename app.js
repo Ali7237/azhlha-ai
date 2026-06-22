@@ -16,7 +16,7 @@ const STATE = {
 const SETTINGS = {
   dark:       true,
   accent:     { color: '#a78bfa', color2: '#7c3aed' },
-  style:      'saudi',
+  style:      'formal',
   length:     'medium',
   saveChats:  true,
 };
@@ -502,16 +502,18 @@ function closeSettingsOutside(e) {
 
 function toggleTheme() {
   SETTINGS.dark = document.getElementById('dark-toggle').checked;
-  document.documentElement.setAttribute('data-theme', SETTINGS.dark ? '' : 'light');
+  document.documentElement.setAttribute('data-theme', SETTINGS.dark ? 'dark' : '');
   saveSetting('dark', SETTINGS.dark);
 }
 
-function setAccent(btn, color, color2) {
+function setAccent(btn, color, color2, light) {
   document.querySelectorAll('.color-opt').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   SETTINGS.accent = { color, color2 };
   document.documentElement.style.setProperty('--acc',  color);
   document.documentElement.style.setProperty('--acc2', color2);
+  if (light) document.documentElement.style.setProperty("--acc-light", light);
+  if (light) document.documentElement.style.setProperty("--acc-glow", light);
   saveSetting('accent', SETTINGS.accent);
 }
 
@@ -536,14 +538,16 @@ function loadSettings() {
   if (saved.length)                  SETTINGS.length     = saved.length;
   if (saved.saveChats !== undefined) SETTINGS.saveChats  = saved.saveChats;
 
-  if (!SETTINGS.dark) {
-    document.documentElement.setAttribute('data-theme', 'light');
+  if (SETTINGS.dark) {
+    document.documentElement.setAttribute('data-theme', '');
     const dt = document.getElementById('dark-toggle');
     if (dt) dt.checked = false;
   }
   if (SETTINGS.accent) {
     document.documentElement.style.setProperty('--acc',  SETTINGS.accent.color);
     document.documentElement.style.setProperty('--acc2', SETTINGS.accent.color2);
+  if (light) document.documentElement.style.setProperty("--acc-light", light);
+  if (light) document.documentElement.style.setProperty("--acc-glow", light);
   }
   const ss = document.getElementById('style-select');
   const ls = document.getElementById('length-select');
