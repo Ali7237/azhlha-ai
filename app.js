@@ -17,7 +17,7 @@ const STATE = {
 const SETTINGS = {
   dark:      false,
   accent:    { color: '#4f46e5', color2: '#4338ca', light: 'rgba(79,70,229,.12)' },
-  style:     'formal',
+  
   length:    'medium',
   lang:      'ar',
   saveChats: true,
@@ -233,7 +233,7 @@ async function sendMessage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         messages: STATE.messages,
-        style:    SETTINGS.style,
+        style:    
         length:   SETTINGS.length,
         lang:     SETTINGS.lang,
         userName: STATE.user?.name || t('guest'),
@@ -650,3 +650,10 @@ function handleKey(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault
 function autoResize(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 140) + 'px'; }
 function scrollDown() { const w = document.getElementById('messages-wrap'); setTimeout(() => w.scrollTo({ top: w.scrollHeight, behavior: 'smooth' }), 50); }
 function esc(t) { return (t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// Apple Sign In
+function loginWithApple() {
+  // Apple Sign In requires Apple Developer account + registered domain
+  // For now show informational message
+  alert('تسجيل الدخول بـ Apple يتطلب ربط نطاق مخصص (Custom Domain) في Apple Developer Console.\n\nيمكنك استخدام Google أو المتابعة كزائر في الوقت الحالي.');
+}
