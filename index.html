@@ -5,6 +5,35 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>آمرني</title>
 <link rel="stylesheet" href="style.css"/>
+<style>
+/* v4 additions */
+.lang-btns { display:flex; gap:.4rem; }
+.lang-btn {
+  flex:1; padding:.4rem; border:1px solid var(--border);
+  border-radius:6px; background:var(--s1); color:var(--text2);
+  font-family:'IBM Plex Sans Arabic',sans-serif; font-size:.8rem;
+  cursor:pointer; transition:all .12s; text-align:center;
+}
+.lang-btn.active { background:var(--acc); color:#fff; border-color:var(--acc); }
+.lang-btn:hover:not(.active) { border-color:var(--acc); color:var(--acc); }
+.memory-input {
+  width:100%; min-height:80px; padding:.6rem .75rem;
+  background:var(--s1); border:1px solid var(--border);
+  border-radius:8px; color:var(--text); resize:vertical;
+  font-family:'IBM Plex Sans Arabic',sans-serif; font-size:.82rem;
+  line-height:1.5; outline:none; transition:border-color .15s;
+}
+.memory-input:focus { border-color:var(--acc); }
+.memory-hint { font-size:.7rem; color:var(--muted); margin-top:.4rem; }
+.save-mem-btn {
+  margin-top:.5rem; padding:.42rem .8rem;
+  background:var(--acc); color:#fff; border:none;
+  border-radius:6px; font-family:'IBM Plex Sans Arabic',sans-serif;
+  font-size:.78rem; cursor:pointer; transition:background .15s;
+}
+.save-mem-btn:hover { background:var(--acc2); }
+.section-content { padding:.5rem 1rem .75rem; }
+</style>
 </head>
 <body>
 
@@ -28,7 +57,7 @@
          data-locale="ar" data-width="320"></div>
     <div class="login-divider">أو</div>
     <button class="guest-btn" onclick="loginAsGuest()">المتابعة كزائر</button>
-    <p class="login-note">بتسجيل الدخول توافق على شروط الاستخدام وسياسة الخصوصية</p>
+    <p class="login-note">بتسجيل الدخول توافق على شروط الاستخدام</p>
   </div>
 </div>
 
@@ -46,18 +75,18 @@
     </div>
 
     <button class="new-chat-btn" onclick="newChat()">
-      <span class="plus-icon">+</span> محادثة جديدة
+      <span class="plus-icon">+</span>
+      <span id="new-chat-btn-text">محادثة جديدة</span>
     </button>
 
     <div class="sidebar-label">اقتراحات</div>
     <div class="quick-list">
-      <button class="quick-item" onclick="quickSend('ما الذي يمكنك مساعدتي به؟')">🤖 ما قدراتك؟</button>
+      <button class="quick-item" onclick="quickSend('ما الذي يمكنك مساعدتي به؟')">🤖 قدراتك</button>
       <button class="quick-item" onclick="quickSend('اكتب لي قصيدة نبطية عن الغربة')">✍️ قصيدة نبطية</button>
-      <button class="quick-item" onclick="quickSend('علمني أساسيات البرمجة')">💻 تعليم البرمجة</button>
-      <button class="quick-item" onclick="quickSend('ساعدني في كتابة سيرة ذاتية احترافية')">📄 سيرة ذاتية</button>
-      <button class="quick-item" onclick="quickSend('ما أفضل طريقة لتعلم اللغة الإنجليزية؟')">🌍 تعلم الإنجليزية</button>
+      <button class="quick-item" onclick="quickSend('علمني أساسيات البرمجة')">💻 البرمجة</button>
+      <button class="quick-item" onclick="quickSend('ساعدني في كتابة سيرة ذاتية')">📄 سيرة ذاتية</button>
       <button class="quick-item" onclick="quickSend('ترجم لي النص التالي إلى الإنجليزية:')">🔄 ترجمة</button>
-      <button class="quick-item" onclick="quickSend('اكتب لي كود HTML لصفحة شخصية كملف')">📄 إنشاء ملف</button>
+      <button class="quick-item" onclick="quickSend('اكتب لي كود HTML لصفحة شخصية كملف')">📁 إنشاء ملف</button>
     </div>
 
     <div class="sidebar-label">المحادثات السابقة</div>
@@ -71,7 +100,7 @@
         <div class="user-name" id="user-name">زائر</div>
         <div class="user-status" id="user-status">تصفح كزائر</div>
       </div>
-      <button class="settings-btn" onclick="openSettings()" title="الإعدادات">⚙️</button>
+      <button class="settings-btn" onclick="openSettings()">⚙️</button>
     </div>
   </aside>
 
@@ -89,28 +118,28 @@
     <div class="messages-wrap" id="messages-wrap">
       <div class="welcome" id="welcome">
         <div class="welcome-logo">A</div>
-        <h1 class="welcome-title">كيف يمكنني مساعدتك؟</h1>
-        <p class="welcome-sub">اسألني عن أي شيء — أكتب، أحلل، أترجم، أبرمج، وأنشئ ملفات</p>
+        <h1 class="welcome-title" id="welcome-title">كيف يمكنني مساعدتك؟</h1>
+        <p class="welcome-sub" id="welcome-sub">اسألني عن أي شيء — أكتب، أحلل، أترجم، أبرمج، وأنشئ ملفات</p>
         <div class="welcome-grid">
-          <div class="wcard" onclick="quickSend('اشرح لي مفهوم الذكاء الاصطناعي بأسلوب بسيط')">
+          <div class="wcard" onclick="quickSend('اشرح لي مفهوم الذكاء الاصطناعي')">
             <span class="wcard-icon">🧠</span>
             <div class="wcard-title">شرح المفاهيم</div>
-            <div class="wcard-sub">اشرح لي مفهوم الذكاء الاصطناعي</div>
+            <div class="wcard-sub">اشرح أي فكرة بأسلوب واضح</div>
           </div>
           <div class="wcard" onclick="quickSend('اكتب لي رسالة بريد إلكتروني رسمية')">
             <span class="wcard-icon">✍️</span>
-            <div class="wcard-title">الكتابة والتحرير</div>
+            <div class="wcard-title">الكتابة</div>
             <div class="wcard-sub">رسائل، مقالات، تقارير</div>
           </div>
-          <div class="wcard" onclick="quickSend('ساعدني في كتابة كود Python لحساب المتوسط الحسابي')">
+          <div class="wcard" onclick="quickSend('ساعدني في كتابة كود Python')">
             <span class="wcard-icon">💻</span>
-            <div class="wcard-title">البرمجة والكود</div>
-            <div class="wcard-sub">اكتب وصحح الأكواد البرمجية</div>
+            <div class="wcard-title">البرمجة</div>
+            <div class="wcard-sub">اكتب وصحح الأكواد</div>
           </div>
-          <div class="wcard" onclick="quickSend('اكتب لي ملف HTML لصفحة شخصية احترافية')">
+          <div class="wcard" onclick="quickSend('اكتب لي ملف HTML لصفحة شخصية')">
             <span class="wcard-icon">📄</span>
-            <div class="wcard-title">إنشاء الملفات</div>
-            <div class="wcard-sub">ملفات HTML، Python، وغيرها</div>
+            <div class="wcard-title">إنشاء ملفات</div>
+            <div class="wcard-sub">HTML، Python، وغيرها</div>
           </div>
         </div>
       </div>
@@ -126,7 +155,7 @@
         </div>
         <input type="file" id="img-input" accept="image/*" style="display:none" onchange="handleImage(event)"/>
         <div class="input-box">
-          <button class="attach-btn" onclick="document.getElementById('img-input').click()" title="إرفاق صورة">📎</button>
+          <button class="attach-btn" onclick="document.getElementById('img-input').click()" title="Attach image">📎</button>
           <textarea id="user-input" placeholder="اكتب رسالتك..." rows="1"
             onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
           <button class="send-btn" id="send-btn" onclick="sendMessage()">
@@ -135,7 +164,7 @@
             </svg>
           </button>
         </div>
-        <div class="input-hint">آمرني قد يُخطئ أحياناً — يُرجى التحقق من المعلومات المهمة</div>
+        <div class="input-hint" id="input-hint">آمرني قد يُخطئ أحياناً — يُرجى التحقق من المعلومات المهمة</div>
       </div>
     </div>
   </main>
@@ -150,6 +179,7 @@
     </div>
     <div class="settings-body">
 
+      <!-- Account -->
       <div class="settings-section">
         <div class="section-label">الحساب</div>
         <div class="account-card">
@@ -162,6 +192,18 @@
         </div>
       </div>
 
+      <!-- Language -->
+      <div class="settings-section">
+        <div class="section-label">لغة الواجهة</div>
+        <div class="section-content">
+          <div class="lang-btns">
+            <button class="lang-btn active" id="lang-ar" onclick="setLang('ar')">عربي 🇸🇦</button>
+            <button class="lang-btn" id="lang-en" onclick="setLang('en')">English 🇺🇸</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Appearance -->
       <div class="settings-section">
         <div class="section-label">المظهر</div>
         <div class="setting-row">
@@ -183,10 +225,11 @@
         </div>
       </div>
 
+      <!-- Response Style -->
       <div class="settings-section">
         <div class="section-label">أسلوب الردود</div>
         <div class="setting-row">
-          <span>اللغة والأسلوب</span>
+          <span>الأسلوب</span>
           <select id="style-select" onchange="saveStyle()">
             <option value="formal" selected>فصحى رسمية</option>
             <option value="saudi">سعودي عامي</option>
@@ -203,6 +246,19 @@
         </div>
       </div>
 
+      <!-- Memory -->
+      <div class="settings-section">
+        <div class="section-label">الذاكرة</div>
+        <div class="section-content">
+          <div style="font-size:.8rem;color:var(--text2);margin-bottom:.5rem;">معلومات تريدني أتذكرها في كل محادثة</div>
+          <textarea class="memory-input" id="memory-input"
+            placeholder="مثال: أنا مطور برمجيات، أفضّل الشرح بأمثلة عملية، عمري 28 سنة..."></textarea>
+          <div class="memory-hint">هذه المعلومات تُضاف في كل محادثة لأفهمك أفضل</div>
+          <button class="save-mem-btn" onclick="saveMemory()">حفظ الذاكرة ✓</button>
+        </div>
+      </div>
+
+      <!-- Chats -->
       <div class="settings-section">
         <div class="section-label">المحادثات</div>
         <div class="setting-row">
@@ -215,13 +271,14 @@
         <button class="danger-btn" onclick="clearAllChats()">حذف جميع المحادثات</button>
       </div>
 
+      <!-- About -->
       <div class="settings-section">
         <div class="section-label">عن التطبيق</div>
         <div class="about-card">
           <div class="about-logo">A</div>
           <div>
             <div class="about-name">آمرني</div>
-            <div class="about-ver">الإصدار 3.0 · مدعوم بـ Llama 3.3</div>
+            <div class="about-ver">الإصدار 4.0 · مدعوم بـ Llama 3.3</div>
           </div>
         </div>
       </div>
@@ -233,5 +290,15 @@
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="app.js"></script>
+<script>
+// sync lang buttons on load
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => {
+    const lang = JSON.parse(localStorage.getItem('amerni_settings')||'{}').lang || 'ar';
+    document.getElementById('lang-ar').classList.toggle('active', lang === 'ar');
+    document.getElementById('lang-en').classList.toggle('active', lang === 'en');
+  }, 100);
+});
+</script>
 </body>
 </html>
