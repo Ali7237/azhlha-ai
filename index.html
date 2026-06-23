@@ -3,46 +3,21 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>آمرني</title>
+<title>آمرني | AMRNI</title>
 <link rel="stylesheet" href="style.css"/>
-<style>
-/* v4 additions */
-.lang-btns { display:flex; gap:.4rem; }
-.lang-btn {
-  flex:1; padding:.4rem; border:1px solid var(--border);
-  border-radius:6px; background:var(--s1); color:var(--text2);
-  font-family:'IBM Plex Sans Arabic',sans-serif; font-size:.8rem;
-  cursor:pointer; transition:all .12s; text-align:center;
-}
-.lang-btn.active { background:var(--acc); color:#fff; border-color:var(--acc); }
-.lang-btn:hover:not(.active) { border-color:var(--acc); color:var(--acc); }
-.memory-input {
-  width:100%; min-height:80px; padding:.6rem .75rem;
-  background:var(--s1); border:1px solid var(--border);
-  border-radius:8px; color:var(--text); resize:vertical;
-  font-family:'IBM Plex Sans Arabic',sans-serif; font-size:.82rem;
-  line-height:1.5; outline:none; transition:border-color .15s;
-}
-.memory-input:focus { border-color:var(--acc); }
-.memory-hint { font-size:.7rem; color:var(--muted); margin-top:.4rem; }
-.save-mem-btn {
-  margin-top:.5rem; padding:.42rem .8rem;
-  background:var(--acc); color:#fff; border:none;
-  border-radius:6px; font-family:'IBM Plex Sans Arabic',sans-serif;
-  font-size:.78rem; cursor:pointer; transition:background .15s;
-}
-.save-mem-btn:hover { background:var(--acc2); }
-.section-content { padding:.5rem 1rem .75rem; }
-</style>
 </head>
 <body>
 
 <!-- LOGIN -->
 <div class="login-screen" id="login-screen">
   <div class="login-card">
-    <div class="login-logo">
-      <div class="login-logo-icon">A</div>
-      <div class="login-logo-text">آمرني</div>
+    <div class="login-logo-wrap">
+      <div class="login-logo-icon">
+        <img src="logo.png" alt="آمرني"/>
+      </div>
+      <div class="login-logo-text">
+        <img src="logo-text.png" alt="AMRNI آمرني"/>
+      </div>
     </div>
     <h1 class="login-title">مرحباً بك</h1>
     <p class="login-sub">مساعدك الذكي للكتابة والتحليل وحل المشكلات</p>
@@ -68,8 +43,8 @@
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-top">
       <div class="sidebar-brand">
-        <div class="brand-icon">A</div>
-        <div class="brand-name">آمرني</div>
+        <div class="brand-icon-sm"><img src="logo.png" alt=""/></div>
+        <div class="brand-name"><img src="logo-text.png" alt="آمرني"/></div>
       </div>
       <button class="sidebar-close" onclick="toggleSidebar()">✕</button>
     </div>
@@ -79,16 +54,6 @@
       <span id="new-chat-btn-text">محادثة جديدة</span>
     </button>
 
-    <div class="sidebar-label">اقتراحات</div>
-    <div class="quick-list">
-      <button class="quick-item" onclick="quickSend('ما الذي يمكنك مساعدتي به؟')">🤖 قدراتك</button>
-      <button class="quick-item" onclick="quickSend('اكتب لي قصيدة نبطية عن الغربة')">✍️ قصيدة نبطية</button>
-      <button class="quick-item" onclick="quickSend('علمني أساسيات البرمجة')">💻 البرمجة</button>
-      <button class="quick-item" onclick="quickSend('ساعدني في كتابة سيرة ذاتية')">📄 سيرة ذاتية</button>
-      <button class="quick-item" onclick="quickSend('ترجم لي النص التالي إلى الإنجليزية:')">🔄 ترجمة</button>
-      <button class="quick-item" onclick="quickSend('اكتب لي كود HTML لصفحة شخصية كملف')">📁 إنشاء ملف</button>
-    </div>
-
     <div class="sidebar-label">المحادثات السابقة</div>
     <div class="history-list" id="history-list">
       <div class="history-empty">لا توجد محادثات سابقة</div>
@@ -97,7 +62,7 @@
     <div class="sidebar-user">
       <div class="user-avatar" id="user-avatar">ز</div>
       <div class="user-info">
-        <div class="user-name" id="user-name">زائر</div>
+        <div class="user-name"  id="user-name">زائر</div>
         <div class="user-status" id="user-status">تصفح كزائر</div>
       </div>
       <button class="settings-btn" onclick="openSettings()">⚙️</button>
@@ -109,7 +74,7 @@
     <header class="topbar">
       <button class="menu-btn" onclick="toggleSidebar()">☰</button>
       <div class="topbar-center">
-        <span class="topbar-name">آمرني</span>
+        <div class="topbar-logo"><img src="logo-text.png" alt="آمرني"/></div>
         <span class="model-badge">Llama 3.3</span>
       </div>
       <button class="topbar-settings" onclick="openSettings()">⚙️</button>
@@ -117,29 +82,33 @@
 
     <div class="messages-wrap" id="messages-wrap">
       <div class="welcome" id="welcome">
-        <div class="welcome-logo">A</div>
-        <h1 class="welcome-title" id="welcome-title">كيف يمكنني مساعدتك؟</h1>
-        <p class="welcome-sub" id="welcome-sub">اسألني عن أي شيء — أكتب، أحلل، أترجم، أبرمج، وأنشئ ملفات</p>
+        <img src="logo.png" class="welcome-logo" alt="آمرني"/>
+        <h1 class="welcome-title" id="welcome-title">
+          كيف يمكنني <span>مساعدتك؟</span>
+        </h1>
+        <p class="welcome-sub" id="welcome-sub">
+          اسألني عن أي شيء — أكتب، أحلل، أترجم، أبرمج، وأنشئ ملفات
+        </p>
         <div class="welcome-grid">
-          <div class="wcard" onclick="quickSend('اشرح لي مفهوم الذكاء الاصطناعي')">
+          <div class="wcard" onclick="quickSend('اشرح لي مفهوم الذكاء الاصطناعي بأسلوب بسيط')">
             <span class="wcard-icon">🧠</span>
             <div class="wcard-title">شرح المفاهيم</div>
-            <div class="wcard-sub">اشرح أي فكرة بأسلوب واضح</div>
+            <div class="wcard-sub">اشرح أي فكرة بوضوح</div>
           </div>
           <div class="wcard" onclick="quickSend('اكتب لي رسالة بريد إلكتروني رسمية')">
             <span class="wcard-icon">✍️</span>
-            <div class="wcard-title">الكتابة</div>
+            <div class="wcard-title">الكتابة والتحرير</div>
             <div class="wcard-sub">رسائل، مقالات، تقارير</div>
           </div>
           <div class="wcard" onclick="quickSend('ساعدني في كتابة كود Python')">
             <span class="wcard-icon">💻</span>
-            <div class="wcard-title">البرمجة</div>
+            <div class="wcard-title">البرمجة والكود</div>
             <div class="wcard-sub">اكتب وصحح الأكواد</div>
           </div>
-          <div class="wcard" onclick="quickSend('اكتب لي ملف HTML لصفحة شخصية')">
+          <div class="wcard" onclick="quickSend('اكتب لي ملف HTML لصفحة شخصية احترافية')">
             <span class="wcard-icon">📄</span>
-            <div class="wcard-title">إنشاء ملفات</div>
-            <div class="wcard-sub">HTML، Python، وغيرها</div>
+            <div class="wcard-title">إنشاء الملفات</div>
+            <div class="wcard-sub">HTML، Python وغيرها</div>
           </div>
         </div>
       </div>
@@ -149,13 +118,13 @@
     <div class="input-area">
       <div class="input-wrap">
         <div class="img-bar" id="img-bar" style="display:none">
-          <img id="img-thumb" alt=""/>
+          <img class="thumb" id="img-thumb" alt=""/>
           <span id="img-name"></span>
           <button onclick="removeImage()">✕</button>
         </div>
         <input type="file" id="img-input" accept="image/*" style="display:none" onchange="handleImage(event)"/>
         <div class="input-box">
-          <button class="attach-btn" onclick="document.getElementById('img-input').click()" title="Attach image">📎</button>
+          <button class="attach-btn" onclick="document.getElementById('img-input').click()">📎</button>
           <textarea id="user-input" placeholder="اكتب رسالتك..." rows="1"
             onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
           <button class="send-btn" id="send-btn" onclick="sendMessage()">
@@ -179,31 +148,26 @@
     </div>
     <div class="settings-body">
 
-      <!-- Account -->
       <div class="settings-section">
         <div class="section-label">الحساب</div>
         <div class="account-card">
           <div class="acc-avatar" id="acc-avatar">ز</div>
           <div class="acc-info">
-            <div class="acc-name" id="acc-name">زائر</div>
+            <div class="acc-name"  id="acc-name">زائر</div>
             <div class="acc-email" id="acc-email">بدون حساب</div>
           </div>
           <button class="acc-btn" id="acc-btn" onclick="toggleLogin()">تسجيل الدخول</button>
         </div>
       </div>
 
-      <!-- Language -->
       <div class="settings-section">
         <div class="section-label">لغة الواجهة</div>
-        <div class="section-content">
-          <div class="lang-btns">
-            <button class="lang-btn active" id="lang-ar" onclick="setLang('ar')">عربي 🇸🇦</button>
-            <button class="lang-btn" id="lang-en" onclick="setLang('en')">English 🇺🇸</button>
-          </div>
+        <div class="lang-btns">
+          <button class="lang-btn active" id="lang-ar" onclick="setLang('ar')">🇸🇦 عربي</button>
+          <button class="lang-btn" id="lang-en" onclick="setLang('en')">🇺🇸 English</button>
         </div>
       </div>
 
-      <!-- Appearance -->
       <div class="settings-section">
         <div class="section-label">المظهر</div>
         <div class="setting-row">
@@ -213,19 +177,8 @@
             <span class="toggle-slider"></span>
           </label>
         </div>
-        <div class="setting-row">
-          <span>لون التمييز</span>
-          <div class="color-picker">
-            <button class="color-opt active" style="background:#4f46e5" onclick="setAccent(this,'#4f46e5','#4338ca','rgba(79,70,229,.12)')"></button>
-            <button class="color-opt" style="background:#0ea5e9" onclick="setAccent(this,'#0ea5e9','#0284c7','rgba(14,165,233,.12)')"></button>
-            <button class="color-opt" style="background:#10b981" onclick="setAccent(this,'#10b981','#059669','rgba(16,185,129,.12)')"></button>
-            <button class="color-opt" style="background:#f59e0b" onclick="setAccent(this,'#f59e0b','#d97706','rgba(245,158,11,.12)')"></button>
-            <button class="color-opt" style="background:#ef4444" onclick="setAccent(this,'#ef4444','#dc2626','rgba(239,68,68,.12)')"></button>
-          </div>
-        </div>
       </div>
 
-      <!-- Response Style -->
       <div class="settings-section">
         <div class="section-label">أسلوب الردود</div>
         <div class="setting-row">
@@ -246,19 +199,17 @@
         </div>
       </div>
 
-      <!-- Memory -->
       <div class="settings-section">
         <div class="section-label">الذاكرة</div>
         <div class="section-content">
           <div style="font-size:.8rem;color:var(--text2);margin-bottom:.5rem;">معلومات تريدني أتذكرها في كل محادثة</div>
           <textarea class="memory-input" id="memory-input"
-            placeholder="مثال: أنا مطور برمجيات، أفضّل الشرح بأمثلة عملية، عمري 28 سنة..."></textarea>
-          <div class="memory-hint">هذه المعلومات تُضاف في كل محادثة لأفهمك أفضل</div>
-          <button class="save-mem-btn" onclick="saveMemory()">حفظ الذاكرة ✓</button>
+            placeholder="مثال: أنا مطور برمجيات، أفضّل الشرح بأمثلة عملية..."></textarea>
+          <div class="memory-hint">تُضاف هذه المعلومات في كل محادثة لأفهمك أفضل</div>
+          <button class="save-mem-btn" onclick="saveMemory()">حفظ ✓</button>
         </div>
       </div>
 
-      <!-- Chats -->
       <div class="settings-section">
         <div class="section-label">المحادثات</div>
         <div class="setting-row">
@@ -271,14 +222,13 @@
         <button class="danger-btn" onclick="clearAllChats()">حذف جميع المحادثات</button>
       </div>
 
-      <!-- About -->
       <div class="settings-section">
         <div class="section-label">عن التطبيق</div>
         <div class="about-card">
-          <div class="about-logo">A</div>
+          <div class="about-logo"><img src="logo.png" alt=""/></div>
           <div>
-            <div class="about-name">آمرني</div>
-            <div class="about-ver">الإصدار 4.0 · مدعوم بـ Llama 3.3</div>
+            <div class="about-name">آمرني · AMRNI</div>
+            <div class="about-ver">الإصدار 5.0 · Llama 3.3 · Groq</div>
           </div>
         </div>
       </div>
@@ -291,7 +241,6 @@
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="app.js"></script>
 <script>
-// sync lang buttons on load
 document.addEventListener('DOMContentLoaded', () => {
   setTimeout(() => {
     const lang = JSON.parse(localStorage.getItem('amerni_settings')||'{}').lang || 'ar';
