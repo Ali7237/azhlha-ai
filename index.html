@@ -5,6 +5,52 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>آمرني | AMRNI</title>
 <link rel="stylesheet" href="style.css"/>
+<style>
+/* v6 extras */
+.lang-btns { display:flex; gap:.4rem; padding:.65rem 1rem; }
+.lang-btn {
+  flex:1; padding:.42rem; border:1px solid var(--border2);
+  border-radius:6px; background:var(--s1); color:var(--text2);
+  font-family:'IBM Plex Sans Arabic',sans-serif; font-size:.8rem;
+  cursor:pointer; transition:all .12s; text-align:center;
+}
+.lang-btn.active {
+  background:linear-gradient(135deg,var(--grad-mid),var(--grad-end));
+  color:#0a1628; border-color:transparent; font-weight:600;
+}
+.lang-btn:hover:not(.active) { border-color:var(--acc); color:var(--acc); }
+
+.memory-input {
+  width:100%; min-height:75px; padding:.6rem .75rem;
+  background:var(--s1); border:1px solid var(--border);
+  border-radius:8px; color:var(--text); resize:vertical;
+  font-family:'IBM Plex Sans Arabic',sans-serif; font-size:.82rem;
+  line-height:1.5; outline:none; transition:border-color .15s; display:block;
+}
+.memory-input:focus { border-color:var(--acc); }
+.memory-hint { font-size:.7rem; color:var(--muted); margin-top:.35rem; }
+.save-mem-btn {
+  margin-top:.5rem; padding:.4rem .85rem;
+  background:linear-gradient(135deg,var(--grad-mid),var(--grad-end));
+  color:#0a1628; border:none; border-radius:6px;
+  font-family:'IBM Plex Sans Arabic',sans-serif;
+  font-size:.78rem; font-weight:600; cursor:pointer; transition:opacity .15s;
+}
+.save-mem-btn:hover { opacity:.85; }
+.section-content { padding:.6rem 1rem .8rem; }
+
+/* Apple & Google login buttons */
+.social-btns { display:flex; flex-direction:column; gap:.7rem; margin-bottom:.5rem; }
+.apple-btn {
+  width:100%; padding:.72rem 1rem;
+  background:#000; color:#fff; border:none; border-radius:8px;
+  font-family:'IBM Plex Sans Arabic',sans-serif; font-size:.9rem;
+  font-weight:500; cursor:pointer; transition:opacity .15s;
+  display:flex; align-items:center; justify-content:center; gap:.6rem;
+}
+.apple-btn:hover { opacity:.88; }
+.apple-icon { font-size:1.1rem; }
+</style>
 </head>
 <body>
 
@@ -12,24 +58,31 @@
 <div class="login-screen" id="login-screen">
   <div class="login-card">
     <div class="login-logo-wrap">
-      <div class="login-logo-icon">
-        <img src="logo.png" alt="آمرني"/>
-      </div>
-      <div class="login-logo-text">
-        <img src="logo-text.png" alt="AMRNI آمرني"/>
-      </div>
+      <div class="login-logo-icon"><img src="logo.png" alt="آمرني"/></div>
+      <div class="login-logo-text"><img src="logo-text.png" alt="AMRNI آمرني"/></div>
     </div>
     <h1 class="login-title">مرحباً بك</h1>
     <p class="login-sub">مساعدك الذكي للكتابة والتحليل وحل المشكلات</p>
-    <div id="g_id_onload"
-         data-client_id="782373073808-dc983qn362aanqm3vgmihs0npvpgqrap.apps.googleusercontent.com"
-         data-callback="handleGoogleLogin"
-         data-auto_prompt="false"></div>
-    <div class="g_id_signin google-btn-wrap"
-         data-type="standard" data-shape="rectangular"
-         data-theme="outline" data-text="signin_with"
-         data-size="large" data-logo_alignment="left"
-         data-locale="ar" data-width="320"></div>
+
+    <div class="social-btns">
+      <!-- Google -->
+      <div id="g_id_onload"
+           data-client_id="782373073808-dc983qn362aanqm3vgmihs0npvpgqrap.apps.googleusercontent.com"
+           data-callback="handleGoogleLogin"
+           data-auto_prompt="false"></div>
+      <div class="g_id_signin google-btn-wrap"
+           data-type="standard" data-shape="rectangular"
+           data-theme="outline" data-text="signin_with"
+           data-size="large" data-logo_alignment="left"
+           data-locale="ar" data-width="320"></div>
+
+      <!-- Apple -->
+      <button class="apple-btn" onclick="loginWithApple()">
+        <span class="apple-icon">🍎</span>
+        تسجيل الدخول باستخدام Apple
+      </button>
+    </div>
+
     <div class="login-divider">أو</div>
     <button class="guest-btn" onclick="loginAsGuest()">المتابعة كزائر</button>
     <p class="login-note">بتسجيل الدخول توافق على شروط الاستخدام</p>
@@ -54,15 +107,15 @@
       <span id="new-chat-btn-text">محادثة جديدة</span>
     </button>
 
-    <div class="sidebar-label">المحادثات السابقة</div>
+    <div class="sidebar-label" id="history-label">المحادثات السابقة</div>
     <div class="history-list" id="history-list">
-      <div class="history-empty">لا توجد محادثات سابقة</div>
+      <div class="history-empty" id="no-history-text">لا توجد محادثات سابقة</div>
     </div>
 
     <div class="sidebar-user">
       <div class="user-avatar" id="user-avatar">ز</div>
       <div class="user-info">
-        <div class="user-name"  id="user-name">زائر</div>
+        <div class="user-name"   id="user-name">زائر</div>
         <div class="user-status" id="user-status">تصفح كزائر</div>
       </div>
       <button class="settings-btn" onclick="openSettings()">⚙️</button>
@@ -105,7 +158,7 @@
             <div class="wcard-title">البرمجة والكود</div>
             <div class="wcard-sub">اكتب وصحح الأكواد</div>
           </div>
-          <div class="wcard" onclick="quickSend('اكتب لي ملف HTML لصفحة شخصية احترافية')">
+          <div class="wcard" onclick="quickSend('اكتب لي ملف HTML لصفحة شخصية')">
             <span class="wcard-icon">📄</span>
             <div class="wcard-title">إنشاء الملفات</div>
             <div class="wcard-sub">HTML، Python وغيرها</div>
@@ -143,13 +196,14 @@
 <div class="settings-overlay" id="settings-overlay" style="display:none" onclick="closeSettingsOutside(event)">
   <div class="settings-panel">
     <div class="settings-header">
-      <div class="settings-title">الإعدادات</div>
+      <div class="settings-title" id="settings-title">الإعدادات</div>
       <button class="settings-close" onclick="closeSettings()">✕</button>
     </div>
     <div class="settings-body">
 
+      <!-- Account -->
       <div class="settings-section">
-        <div class="section-label">الحساب</div>
+        <div class="section-label" id="lbl-account">الحساب</div>
         <div class="account-card">
           <div class="acc-avatar" id="acc-avatar">ز</div>
           <div class="acc-info">
@@ -160,18 +214,20 @@
         </div>
       </div>
 
+      <!-- Language -->
       <div class="settings-section">
-        <div class="section-label">لغة الواجهة</div>
+        <div class="section-label" id="lbl-lang">لغة الواجهة</div>
         <div class="lang-btns">
           <button class="lang-btn active" id="lang-ar" onclick="setLang('ar')">🇸🇦 عربي</button>
-          <button class="lang-btn" id="lang-en" onclick="setLang('en')">🇺🇸 English</button>
+          <button class="lang-btn"        id="lang-en" onclick="setLang('en')">🇺🇸 English</button>
         </div>
       </div>
 
+      <!-- Appearance -->
       <div class="settings-section">
-        <div class="section-label">المظهر</div>
+        <div class="section-label" id="lbl-appearance">المظهر</div>
         <div class="setting-row">
-          <span>الوضع الداكن</span>
+          <span id="lbl-dark">الوضع الداكن</span>
           <label class="toggle">
             <input type="checkbox" id="dark-toggle" onchange="toggleTheme()"/>
             <span class="toggle-slider"></span>
@@ -179,18 +235,11 @@
         </div>
       </div>
 
+      <!-- Response length -->
       <div class="settings-section">
-        <div class="section-label">أسلوب الردود</div>
+        <div class="section-label" id="lbl-responses">الردود</div>
         <div class="setting-row">
-          <span>الأسلوب</span>
-          <select id="style-select" onchange="saveStyle()">
-            <option value="formal" selected>فصحى رسمية</option>
-            <option value="saudi">سعودي عامي</option>
-            <option value="casual">عربي بسيط</option>
-          </select>
-        </div>
-        <div class="setting-row">
-          <span>طول الرد</span>
+          <span id="lbl-length">طول الرد</span>
           <select id="length-select" onchange="saveStyle()">
             <option value="short">مختصر</option>
             <option value="medium" selected>متوازن</option>
@@ -199,36 +248,41 @@
         </div>
       </div>
 
+      <!-- Memory -->
       <div class="settings-section">
-        <div class="section-label">الذاكرة</div>
+        <div class="section-label" id="lbl-memory">الذاكرة</div>
         <div class="section-content">
-          <div style="font-size:.8rem;color:var(--text2);margin-bottom:.5rem;">معلومات تريدني أتذكرها في كل محادثة</div>
+          <div style="font-size:.8rem;color:var(--text2);margin-bottom:.5rem;" id="lbl-memory-desc">
+            معلومات تريدني أتذكرها في كل محادثة
+          </div>
           <textarea class="memory-input" id="memory-input"
             placeholder="مثال: أنا مطور برمجيات، أفضّل الشرح بأمثلة عملية..."></textarea>
-          <div class="memory-hint">تُضاف هذه المعلومات في كل محادثة لأفهمك أفضل</div>
-          <button class="save-mem-btn" onclick="saveMemory()">حفظ ✓</button>
+          <div class="memory-hint" id="lbl-memory-hint">تُضاف هذه المعلومات في كل محادثة لأفهمك أفضل</div>
+          <button class="save-mem-btn" onclick="saveMemory()" id="save-mem-btn">حفظ ✓</button>
         </div>
       </div>
 
+      <!-- Chats -->
       <div class="settings-section">
-        <div class="section-label">المحادثات</div>
+        <div class="section-label" id="lbl-chats">المحادثات</div>
         <div class="setting-row">
-          <span>حفظ المحادثات تلقائياً</span>
+          <span id="lbl-autosave">حفظ تلقائي</span>
           <label class="toggle">
             <input type="checkbox" id="save-toggle" checked onchange="saveSetting('saveChats', this.checked)"/>
             <span class="toggle-slider"></span>
           </label>
         </div>
-        <button class="danger-btn" onclick="clearAllChats()">حذف جميع المحادثات</button>
+        <button class="danger-btn" id="delete-all-btn" onclick="clearAllChats()">حذف جميع المحادثات</button>
       </div>
 
+      <!-- About -->
       <div class="settings-section">
-        <div class="section-label">عن التطبيق</div>
+        <div class="section-label" id="lbl-about">عن التطبيق</div>
         <div class="about-card">
           <div class="about-logo"><img src="logo.png" alt=""/></div>
           <div>
             <div class="about-name">آمرني · AMRNI</div>
-            <div class="about-ver">الإصدار 5.0 · Llama 3.3 · Groq</div>
+            <div class="about-ver" id="about-ver">الإصدار 6.0 · Llama 3.3 · Groq</div>
           </div>
         </div>
       </div>
@@ -243,10 +297,12 @@
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   setTimeout(() => {
-    const lang = JSON.parse(localStorage.getItem('amerni_settings')||'{}').lang || 'ar';
-    document.getElementById('lang-ar').classList.toggle('active', lang === 'ar');
-    document.getElementById('lang-en').classList.toggle('active', lang === 'en');
-  }, 100);
+    const s = JSON.parse(localStorage.getItem('amerni_settings')||'{}');
+    const lang = s.lang || 'ar';
+    document.getElementById('lang-ar').classList.toggle('active', lang==='ar');
+    document.getElementById('lang-en').classList.toggle('active', lang==='en');
+    if (s.length) document.getElementById('length-select').value = s.length;
+  }, 150);
 });
 </script>
 </body>
