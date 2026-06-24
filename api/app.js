@@ -239,6 +239,7 @@ async function sendMessage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         messages: STATE.messages,
+        style:    SETTINGS.style || 'formal',
         length:   SETTINGS.length,
         lang:     SETTINGS.lang,
         userName: STATE.user?.name || t('guest'),
@@ -542,10 +543,10 @@ function setAccent(btn, color, color2, light) {
 }
 
 function saveStyle() {
-  SETTINGS.style  = document.getElementById('style-select').value;
-  SETTINGS.length = document.getElementById('length-select').value;
-  saveSetting('style',  SETTINGS.style);
-  saveSetting('length', SETTINGS.length);
+  const ss = document.getElementById('style-select');
+  const ls = document.getElementById('length-select');
+  if (ss) { SETTINGS.style  = ss.value; saveSetting('style',  SETTINGS.style); }
+  if (ls) { SETTINGS.length = ls.value; saveSetting('length', SETTINGS.length); }
 }
 
 function setLang(lang) {

@@ -49,7 +49,7 @@
   display:flex; align-items:center; justify-content:center; gap:.6rem;
 }
 .apple-btn:hover { opacity:.88; }
-.apple-icon { font-size:1.1rem; }
+.apple-btn img { width:18px; height:18px; object-fit:contain; filter:brightness(0) invert(1); }
 </style>
 </head>
 <body>
@@ -78,13 +78,13 @@
 
       <!-- Apple -->
       <button class="apple-btn" onclick="loginWithApple()">
-        <span class="apple-icon">🍎</span>
+        <img src="apple-logo.png" alt="Apple"/>
         تسجيل الدخول باستخدام Apple
       </button>
     </div>
 
     <div class="login-divider">أو</div>
-    <button class="guest-btn" onclick="loginAsGuest()">المتابعة كزائر</button>
+    <button type="button" class="guest-btn" id="guest-btn">المتابعة كزائر</button>
     <p class="login-note">بتسجيل الدخول توافق على شروط الاستخدام</p>
   </div>
 </div>
@@ -235,9 +235,17 @@
         </div>
       </div>
 
-      <!-- Response length -->
+      <!-- Response style + length -->
       <div class="settings-section">
         <div class="section-label" id="lbl-responses">الردود</div>
+        <div class="setting-row">
+          <span id="lbl-style">أسلوب الرد</span>
+          <select id="style-select" onchange="saveStyle()">
+            <option value="formal" selected>فصحى رسمية</option>
+            <option value="saudi">سعودي عامي</option>
+            <option value="casual">عربي بسيط</option>
+          </select>
+        </div>
         <div class="setting-row">
           <span id="lbl-length">طول الرد</span>
           <select id="length-select" onchange="saveStyle()">

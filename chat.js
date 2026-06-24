@@ -10,18 +10,14 @@ module.exports = async function handler(req, res) {
     const apiKey = process.env.GROQ_API_KEY;
     if (!apiKey) return res.status(200).json({ reply: '⚠️ GROQ_API_KEY غير موجود.' });
 
-    const { messages, length, userName, memory } = req.body || {};
+    const { messages, length, userName, lang, memory } = req.body || {};
     if (!messages?.length) return res.status(400).json({ error: 'No messages' });
 
-    // detect language from last user message
-    const lastMsg = messages[messages.length - 1]?.content || '';
-    const arabicChars = (lastMsg.match(/[\u0600-\u06FF]/g) || []).length;
-    const englishChars = (lastMsg.match(/[a-zA-Z]/g) || []).length;
-    const isEn = englishChars > arabicChars;
+    const isEn = lang === 'en';
 
     const lengthMap = {
       short:  isEn ? 'Keep responses brief: 2-4 sentences.' : 'ردودك مختصرة في 2-4 جمل فقط.',
-      medium: isEn ? 'Keep responses balanced.' : 'ردودك متوازنة، لا قصيرة جداً ولا طويلة جداً.',
+      medium: isEn ? 'Keep responses balanced — not too short, not too long.' : 'ردودك متوازنة، لا قصيرة جداً ولا طويلة جداً.',
       long:   isEn ? 'Provide detailed, comprehensive responses.' : 'ردودك مفصّلة وشاملة مع الشرح الكافي.',
     };
 
@@ -33,12 +29,11 @@ module.exports = async function handler(req, res) {
       ? `You are "Amerni" (آمرني), an advanced and professional AI assistant.
 
 ## Strict Rules:
-1. **CRITICAL — Language detection**: Detect the language of the user's message and ALWAYS respond in the SAME language. If they write in English → respond in English. If they write in Arabic → respond in Arabic. If they mix → use the dominant language.
-2. NEVER mix languages in a single response. No Chinese, Japanese, or any other script under any circumstance.
-3. Your name is "Amerni". Never mention Groq, Meta, Llama, or any underlying technology.
-4. Zero spelling or grammar mistakes.
-5. Use Markdown formatting when helpful.
-6. If you don't know something, say so clearly.
+1. Always respond in formal, professional English only — unless the user explicitly requests another language or asks for code.
+2. Your name is "Amerni". Never mention Groq, Meta, Llama, or any underlying technology.
+3. Zero spelling or grammar mistakes.
+4. Use Markdown formatting when helpful (headings, lists, code blocks).
+5. If you don't know something, say so clearly and honestly.
 
 ## Response Length:
 ${lengthMap[length] || lengthMap.medium}
@@ -52,23 +47,22 @@ ${memoryBlock}
 - Translate between languages
 - Explain scientific and technical concepts
 - Analyze and correct text
-- Create downloadable text files
+- Create downloadable files
 
-## File Creation (text files only — NO docx, xlsx, pdf):
-Allowed extensions: .txt .md .html .js .py .css .json .csv
+## File Creation Format:
+When asked to create a file, place the content at the end of your response:
 %%%FILE_START%%%
-{"name": "filename.txt", "content": "plain text content here"}
+{"name": "filename.txt", "content": "file content here"}
 %%%FILE_END%%%`
 
       : `أنت "آمرني"، مساعد ذكاء اصطناعي متطور ومحترف.
 
 ## قواعد صارمة:
-1. **مهم جداً — اكتشاف اللغة**: اكتشف لغة رسالة المستخدم وأجب دائماً بنفس اللغة. إذا كتب بالعربية → أجب بالعربية الفصحى. إذا كتب بالإنجليزية → أجب بالإنجليزية. إذا خلط → استخدم اللغة الغالبة.
-2. ممنوع منعاً باتاً خلط اللغات في رد واحد. ممنوع أي حرف صيني أو ياباني أو غيرهما تحت أي ظرف.
-3. اسمك "آمرني" فقط. لا تذكر Groq أو Meta أو Llama أو أي تقنية.
-4. ردودك خالية تماماً من الأخطاء الإملائية والنحوية.
-5. استخدم Markdown عند الحاجة.
-6. إذا لم تعرف شيئاً، قل ذلك بوضوح وصدق.
+1. تجيب دائماً بالعربية الفصحى الواضحة والمحترمة — ممنوع منعاً باتاً استخدام أي كلمة أو حرف من لغة أخرى إلا إذا طلب المستخدم ترجمة أو كتابة كود برمجي.
+2. اسمك "آمرني" فقط. لا تذكر Groq أو Meta أو Llama أو أي تقنية.
+3. ردودك خالية تماماً من الأخطاء الإملائية والنحوية.
+4. استخدم Markdown بشكل صحيح عند الحاجة (عناوين، قوائم، أكواد).
+5. إذا لم تعرف شيئاً، قل ذلك بوضوح وصدق.
 
 ## طول الرد:
 ${lengthMap[length] || lengthMap.medium}
@@ -82,12 +76,12 @@ ${memoryBlock}
 - الترجمة بين اللغات
 - شرح المفاهيم العلمية والتقنية
 - تحليل النصوص وتصحيحها
-- إنشاء الملفات النصية القابلة للتحميل
+- إنشاء الملفات القابلة للتحميل
 
-## إنشاء الملفات (نصوص فقط — ممنوع docx أو xlsx أو pdf):
-الامتدادات المسموحة: .txt .md .html .js .py .css .json .csv
+## صيغة إنشاء الملفات:
+عند طلب إنشاء ملف، ضع المحتوى في نهاية ردك:
 %%%FILE_START%%%
-{"name": "اسم_الملف.txt", "content": "المحتوى النصي هنا"}
+{"name": "اسم_الملف.txt", "content": "محتوى الملف"}
 %%%FILE_END%%%`;
 
     const groqMessages = [
@@ -107,7 +101,7 @@ ${memoryBlock}
       body: JSON.stringify({
         model: 'llama-3.3-70b-versatile',
         messages: groqMessages,
-        temperature: 0.6,
+        temperature: 0.65,
         max_tokens: 4096,
       }),
     });
@@ -129,9 +123,6 @@ ${memoryBlock}
     const data = JSON.parse(rawText);
     let reply = data.choices?.[0]?.message?.content
       || (isEn ? 'Unable to respond. Please try again.' : 'لم أتمكن من الرد، يُرجى المحاولة مجدداً.');
-
-    // فلتر الأحرف الصينية/اليابانية/الكورية
-    reply = reply.replace(/[\u3000-\u9FFF\uAC00-\uD7AF\uF900-\uFAFF]/g, '');
 
     let fileData = null;
     const fileMatch = reply.match(/%%%FILE_START%%%([\s\S]*?)%%%FILE_END%%%/);
