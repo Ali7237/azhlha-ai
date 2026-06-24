@@ -8,51 +8,37 @@ module.exports = async function handler(req, res) {
 
   try {
     const apiKey = process.env.GROQ_API_KEY;
-    if (!apiKey) return res.status(200).json({ reply: '⚠️ GROQ_API_KEY missing.' });
+    if (!apiKey) return res.status(200).json({ reply: '⚠️ GROQ_API_KEY غير موجود.' });
 
-    const { messages, style, length, userName, lang, memory } = req.body || {};
+    const { messages, length, userName, lang, memory } = req.body || {};
     if (!messages?.length) return res.status(400).json({ error: 'No messages' });
 
     const isEn = lang === 'en';
 
-    // ── Style instructions ──
-    const styleMap = {
-      formal: isEn
-        ? `You speak in formal, professional English. Responses are clear and well-structured.`
-        : `تتحدث بالعربية الفصحى الرسمية الواضحة. ردودك دقيقة ومنظمة ومحترفة.`,
-      saudi: `تتحدث بالعامية السعودية الطبيعية. تستخدم كلمات مثل "وش"، "زين"، "يلا"، "ترا"، "والله". ردودك خفيفة وودية.`,
-      casual: isEn
-        ? `You speak in a friendly, casual conversational English tone.`
-        : `تتحدث بعربية بسيطة مفهومة للجميع، وسط بين الفصحى والعامية.`,
-    };
-
     const lengthMap = {
-      short:  isEn ? `Keep responses brief: 2-4 sentences max.` : `ردودك مختصرة في 2-4 جمل.`,
-      medium: isEn ? `Keep responses balanced — not too short, not too long.` : `ردودك متوازنة، لا قصيرة جداً ولا طويلة جداً.`,
-      long:   isEn ? `Provide detailed, comprehensive responses with full explanation.` : `ردودك مفصّلة وشاملة مع الشرح الكافي.`,
+      short:  isEn ? 'Keep responses brief: 2-4 sentences.' : 'ردودك مختصرة في 2-4 جمل فقط.',
+      medium: isEn ? 'Keep responses balanced — not too short, not too long.' : 'ردودك متوازنة، لا قصيرة جداً ولا طويلة جداً.',
+      long:   isEn ? 'Provide detailed, comprehensive responses.' : 'ردودك مفصّلة وشاملة مع الشرح الكافي.',
     };
 
-    // ── Memory context ──
     const memoryBlock = memory?.trim()
-      ? (isEn
-          ? `## What I know about you:\n${memory}\n`
-          : `## ما أعرفه عنك:\n${memory}\n`)
+      ? (isEn ? `## About the user:\n${memory}\n` : `## معلومات عن المستخدم:\n${memory}\n`)
       : '';
 
     const systemPrompt = isEn
-      ? `You are "Amerni" (آمرني), an advanced AI assistant.
+      ? `You are "Amerni" (آمرني), an advanced and professional AI assistant.
 
-## Strict rules:
-1. **Language**: Always respond in English only, unless the user explicitly asks for another language or writes code.
-2. **Identity**: Your name is "Amerni". Never mention Groq, Meta, Llama, or any underlying technology.
-3. **Accuracy**: Zero spelling or grammar mistakes.
-4. **Professionalism**: Use Markdown formatting when helpful.
-5. **Honesty**: If you don't know something, say so clearly.
+## Strict Rules:
+1. Always respond in formal, professional English only — unless the user explicitly requests another language or asks for code.
+2. Your name is "Amerni". Never mention Groq, Meta, Llama, or any underlying technology.
+3. Zero spelling or grammar mistakes.
+4. Use Markdown formatting when helpful (headings, lists, code blocks).
+5. If you don't know something, say so clearly and honestly.
 
-## Style:
-${styleMap[style] || styleMap.formal}
+## Response Length:
 ${lengthMap[length] || lengthMap.medium}
-${userName && userName !== 'Guest' ? `## User:\nName: ${userName}` : ''}
+
+${userName && userName !== 'Guest' ? `## User's name: ${userName}` : ''}
 ${memoryBlock}
 
 ## Capabilities:
@@ -61,26 +47,27 @@ ${memoryBlock}
 - Translate between languages
 - Explain scientific and technical concepts
 - Analyze and correct text
-- Create downloadable files (wrap content between %%%FILE_START%%% and %%%FILE_END%%%)
+- Create downloadable files
 
-## File format:
+## File Creation Format (TEXT FILES ONLY — no docx, xlsx, pdf):
+When asked to create a file, place the content at the end of your response:
 %%%FILE_START%%%
-{"name": "filename.txt", "content": "file content here"}
+{"name": "filename.txt", "content": "plain text content — NO binary formats like docx or xlsx"}
 %%%FILE_END%%%`
 
       : `أنت "آمرني"، مساعد ذكاء اصطناعي متطور ومحترف.
 
 ## قواعد صارمة:
-1. **اللغة**: اكتب دائماً بالعربية فقط — ممنوع أي كلمة أو حرف من لغة أخرى إلا إذا طلب المستخدم ترجمة أو كود برمجي.
-2. **الهوية**: اسمك "آمرني" فقط. لا تذكر Groq أو Meta أو Llama أو أي تقنية.
-3. **الدقة**: ردودك خالية تماماً من الأخطاء الإملائية والنحوية.
-4. **الاحترافية**: استخدم Markdown عند الحاجة.
-5. **الصدق**: إذا لم تعرف شيئاً قل ذلك بوضوح.
+1. تجيب دائماً بالعربية الفصحى الواضحة والمحترمة — ممنوع منعاً باتاً استخدام أي كلمة أو حرف من لغة أخرى إلا إذا طلب المستخدم ترجمة أو كتابة كود برمجي.
+2. اسمك "آمرني" فقط. لا تذكر Groq أو Meta أو Llama أو أي تقنية.
+3. ردودك خالية تماماً من الأخطاء الإملائية والنحوية.
+4. استخدم Markdown بشكل صحيح عند الحاجة (عناوين، قوائم، أكواد).
+5. إذا لم تعرف شيئاً، قل ذلك بوضوح وصدق.
 
-## أسلوبك:
-${styleMap[style] || styleMap.formal}
+## طول الرد:
 ${lengthMap[length] || lengthMap.medium}
-${userName && userName !== 'زائر' ? `## المستخدم:\nاسمه ${userName}` : ''}
+
+${userName && userName !== 'زائر' ? `## اسم المستخدم: ${userName}` : ''}
 ${memoryBlock}
 
 ## قدراتك:
@@ -89,11 +76,13 @@ ${memoryBlock}
 - الترجمة بين اللغات
 - شرح المفاهيم العلمية والتقنية
 - تحليل النصوص وتصحيحها
-- إنشاء الملفات (ضع المحتوى بين %%%FILE_START%%% و %%%FILE_END%%%)
+- إنشاء الملفات القابلة للتحميل
 
-## صيغة إنشاء الملفات:
+## صيغة إنشاء الملفات (نصوص فقط — ممنوع docx أو xlsx أو pdf):
+الامتدادات المسموحة: .txt .md .html .js .py .css .json .csv فقط.
+عند طلب إنشاء ملف، ضع المحتوى في نهاية ردك:
 %%%FILE_START%%%
-{"name": "اسم_الملف.txt", "content": "محتوى الملف"}
+{"name": "اسم_الملف.txt", "content": "المحتوى النصي فقط — ممنوع استخدام docx أو xlsx"}
 %%%FILE_END%%%`;
 
     const groqMessages = [
@@ -113,7 +102,7 @@ ${memoryBlock}
       body: JSON.stringify({
         model: 'llama-3.3-70b-versatile',
         messages: groqMessages,
-        temperature: 0.7,
+        temperature: 0.65,
         max_tokens: 4096,
       }),
     });
@@ -121,20 +110,20 @@ ${memoryBlock}
     const rawText = await groqRes.text();
 
     if (!groqRes.ok) {
-      let errMsg = `Error ${groqRes.status}`;
+      let errMsg = `خطأ ${groqRes.status}`;
       try {
         const errData = JSON.parse(rawText);
         if (errData.error?.message) errMsg = errData.error.message;
         if (groqRes.status === 429) errMsg = isEn
           ? 'Rate limit reached. Please wait a moment and try again.'
-          : 'تجاوزت الحد المسموح. انتظر دقيقة وحاول مرة أخرى.';
+          : 'تجاوزت الحد المسموح. يُرجى الانتظار دقيقة والمحاولة مجدداً.';
       } catch {}
       return res.status(200).json({ reply: `⚠️ ${errMsg}` });
     }
 
     const data = JSON.parse(rawText);
     let reply = data.choices?.[0]?.message?.content
-      || (isEn ? 'Unable to respond. Please try again.' : 'لم أتمكن من الرد، يرجى المحاولة مرة أخرى.');
+      || (isEn ? 'Unable to respond. Please try again.' : 'لم أتمكن من الرد، يُرجى المحاولة مجدداً.');
 
     let fileData = null;
     const fileMatch = reply.match(/%%%FILE_START%%%([\s\S]*?)%%%FILE_END%%%/);
@@ -151,6 +140,6 @@ ${memoryBlock}
     return res.status(200).json({ reply, fileData });
 
   } catch (err) {
-    return res.status(200).json({ reply: `⚠️ Technical error: ${err.message}` });
+    return res.status(200).json({ reply: `⚠️ خطأ تقني: ${err.message}` });
   }
 };
