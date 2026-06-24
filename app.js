@@ -255,6 +255,11 @@ async function sendMessage() {
     STATE.messages.push(aiMsg);
     await appendAIMsgTyping(data.reply);
 
+    // ── Handle professional file generation ──
+    if (data.generateData) {
+      await handleFileGeneration(data.generateData, data.reply);
+    }
+
     if (data.fileData) appendFileCard(data.fileData);
     saveChat(content);
 
@@ -375,6 +380,97 @@ function appendFileCard(fileData) {
       </div>
     </div>`;
   c.appendChild(d); scrollDown();
+}
+
+// ══════════════════════════════════════
+//  توليد الملفات الاحترافية
+// ══════════════════════════════════════
+async function handleFileGeneration(genData, contentText) {
+  const isEn = SETTINGS.lang === 'en';
+  const typeLabels = { pdf: 'PDF', docx: 'Word', xlsx: 'Excel', pptx: 'PowerPoint' };
+  const typeLabel  = typeLabels[genData.type] || genData.type.toUpperCase();
+
+  // Show generating card
+  const cardId = 'gen-' + Date.now();
+  appendGeneratingCard(cardId, typeLabel, genData.filename, genData.type);
+
+  try {
+    const res = await fetch('/api/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type:     genData.type,
+        content:  contentText,
+        filename: genData.filename || 'document',
+        lang:     genData.lang || SETTINGS.lang,
+      }),
+    });
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    const blob     = await res.blob();
+    const url      = URL.createObjectURL(blob);
+    const ext      = genData.type;
+    const filename = `${genData.filename || 'document'}.${ext}`;
+
+    updateGeneratingCard(cardId, filename, url, typeLabel);
+
+  } catch (err) {
+    failGeneratingCard(cardId, err.message);
+  }
+}
+
+function appendGeneratingCard(id, typeLabel, filename, type) {
+  const icons = { pdf: '📄', docx: '📝', xlsx: '📊', pptx: '📑' };
+  const icon  = icons[type] || '📄';
+  const isEn  = SETTINGS.lang === 'en';
+  const loadingText = isEn ? `Generating ${typeLabel} file...` : `جارٍ إنشاء ملف ${typeLabel}...`;
+
+  const c = document.getElementById('messages');
+  const d = document.createElement('div');
+  d.className = 'msg ai'; d.id = id;
+  d.innerHTML = `
+    <div class="msg-av ai-av"><img src="logo.png" alt=""/></div>
+    <div class="msg-content">
+      <div class="gen-card" id="${id}-card">
+        <div class="gen-card-icon">${icon}</div>
+        <div class="gen-card-info">
+          <div class="gen-card-name">${esc(filename || 'document')}.${type}</div>
+          <div class="gen-card-status loading">${loadingText}</div>
+        </div>
+        <div class="gen-spinner"></div>
+      </div>
+    </div>`;
+  c.appendChild(d); scrollDown();
+}
+
+function updateGeneratingCard(id, filename, url, typeLabel) {
+  const isEn  = SETTINGS.lang === 'en';
+  const ready = isEn ? `${typeLabel} file ready ✅` : `ملف ${typeLabel} جاهز ✅`;
+  const dlBtn = isEn ? '⬇ Download' : '⬇ تحميل';
+
+  const card = document.getElementById(`${id}-card`);
+  if (!card) return;
+  card.innerHTML = `
+    <div class="gen-card-icon">✅</div>
+    <div class="gen-card-info">
+      <div class="gen-card-name">${esc(filename)}</div>
+      <div class="gen-card-status done">${ready}</div>
+    </div>
+    <a class="file-card-btn" href="${url}" download="${esc(filename)}">${dlBtn}</a>`;
+  scrollDown();
+}
+
+function failGeneratingCard(id, errMsg) {
+  const isEn = SETTINGS.lang === 'en';
+  const card = document.getElementById(`${id}-card`);
+  if (!card) return;
+  card.innerHTML = `
+    <div class="gen-card-icon">⚠️</div>
+    <div class="gen-card-info">
+      <div class="gen-card-name">${isEn ? 'Generation failed' : 'فشل إنشاء الملف'}</div>
+      <div class="gen-card-status fail">${esc(errMsg)}</div>
+    </div>`;
 }
 
 function downloadFile(name, b64) {

@@ -763,6 +763,41 @@ select:focus { border-color: var(--acc); }
 .about-ver  { font-size: .7rem; color: var(--muted); margin-top: 1px; }
 
 /* ════════════════════════════════════════
+   FILE GENERATION CARD
+════════════════════════════════════════ */
+.gen-card {
+  display: flex; align-items: center; gap: .75rem;
+  background: var(--s1); border: 1px solid var(--border);
+  border-radius: var(--r-md); padding: .9rem 1rem;
+  max-width: 340px; margin-top: .4rem;
+  transition: border-color .2s;
+}
+.gen-card:has(.done) { border-color: var(--acc); background: var(--acc-light); }
+.gen-card:has(.fail) { border-color: var(--red); }
+
+.gen-card-icon { font-size: 1.5rem; flex-shrink: 0; }
+.gen-card-info { flex: 1; min-width: 0; }
+.gen-card-name {
+  font-size: .83rem; font-weight: 600;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  color: var(--text);
+}
+.gen-card-status { font-size: .72rem; margin-top: 3px; }
+.gen-card-status.loading { color: var(--muted); }
+.gen-card-status.done    { color: var(--acc2); font-weight: 600; }
+.gen-card-status.fail    { color: var(--red); }
+
+/* Spinner */
+.gen-spinner {
+  width: 20px; height: 20px; flex-shrink: 0;
+  border: 2.5px solid var(--border2);
+  border-top-color: var(--acc);
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ════════════════════════════════════════
    RESPONSIVE
 ════════════════════════════════════════ */
 @media (max-width: 640px) {

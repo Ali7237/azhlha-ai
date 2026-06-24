@@ -1,5 +1,12 @@
 {
   "name": "amerni-ai",
-  "version": "1.0.0",
-  "type": "commonjs"
+  "version": "7.0.0",
+  "type": "commonjs",
+  "description": "آمرني — AI Assistant with Professional File Generation",
+  "dependencies": {
+    "pdfkit": "^0.15.0",
+    "docx": "^8.5.0",
+    "exceljs": "^4.4.0",
+    "pptxgenjs": "^3.12.0"
+  }
 }
