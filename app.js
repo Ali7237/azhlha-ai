@@ -239,7 +239,6 @@ async function sendMessage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         messages: STATE.messages,
-        style:    
         length:   SETTINGS.length,
         lang:     SETTINGS.lang,
         userName: STATE.user?.name || t('guest'),
