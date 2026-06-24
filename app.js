@@ -121,6 +121,11 @@ function t(key) { return UI[SETTINGS.lang]?.[key] || UI.ar[key] || key; }
 //  تهيئة
 // ══════════════════════════════════════
 document.addEventListener('DOMContentLoaded', () => {
+  // ربط زر الزائر
+  setTimeout(() => {
+    const gb = document.getElementById('guest-btn');
+    if (gb) gb.onclick = function(e) { e.preventDefault(); loginAsGuest(); };
+  }, 200);
   loadSettings();
   checkAuth();
   if (typeof marked !== 'undefined') {
@@ -148,7 +153,8 @@ function handleGoogleLogin(response) {
 }
 
 function loginAsGuest() {
-  STATE.user = { name: t('guest'), email: '', photo: null, type: 'guest' };
+  const guestName = SETTINGS.lang === 'en' ? 'Guest' : 'زائر';
+  STATE.user = { name: guestName, email: '', photo: null, type: 'guest' };
   enterApp();
 }
 
@@ -657,3 +663,15 @@ function loginWithApple() {
   // For now show informational message
   alert('تسجيل الدخول بـ Apple يتطلب ربط نطاق مخصص (Custom Domain) في Apple Developer Console.\n\nيمكنك استخدام Google أو المتابعة كزائر في الوقت الحالي.');
 }
+
+document.addEventListener('AppleIDSignInOnSuccess', (e) => {
+  const d = e.detail;
+  STATE.user = {
+    name: d.user ? `${d.user.name?.firstName||''} ${d.user.name?.lastName||''}`.trim() || 'Apple User' : 'Apple User',
+    email: d.user?.email || '',
+    photo: null,
+    type: 'apple'
+  };
+  localStorage.setItem('amerni_user', JSON.stringify(STATE.user));
+  enterApp();
+});
