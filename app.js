@@ -1,9 +1,9 @@
 // ════════════════════════════════════════
-//  آمرني — app.js  v4
-//  + Language switch (AR/EN)
-//  + User memory across sessions
+//  آمرني v8 — app.js
+//  Complete rewrite: clean, consistent, fully working
 // ════════════════════════════════════════
 
+// ── State ────────────────────────────────
 const STATE = {
   messages:      [],
   imageBase64:   null,
@@ -16,116 +16,109 @@ const STATE = {
 
 const SETTINGS = {
   dark:      false,
-  accent:    { color: '#4f46e5', color2: '#4338ca', light: 'rgba(79,70,229,.12)' },
-  
-  length:    'medium',
   lang:      'ar',
+  style:     'formal',
+  length:    'medium',
   saveChats: true,
 };
 
-// UI strings for AR/EN
+// ── i18n strings ─────────────────────────
 const UI = {
   ar: {
-    newChat:      'محادثة جديدة',
-    suggestions:  'اقتراحات',
-    history:      'المحادثات السابقة',
-    noHistory:    'لا توجد محادثات سابقة',
-    guest:        'زائر',
-    guestStatus:  'تصفح كزائر',
-    placeholder:  'اكتب رسالتك...',
-    hint:         'آمرني قد يُخطئ أحياناً — يُرجى التحقق من المعلومات المهمة',
-    settings:     'الإعدادات',
-    account:      'الحساب',
-    appearance:   'المظهر',
-    darkMode:     'الوضع الداكن',
-    accentColor:  'لون التمييز',
-    responseStyle:'أسلوب الردود',
-    styleLabel:   'اللغة والأسلوب',
-    lengthLabel:  'طول الرد',
-    chats:        'المحادثات',
-    autoSave:     'حفظ المحادثات تلقائياً',
-    deleteAll:    'حذف جميع المحادثات',
-    about:        'عن التطبيق',
-    version:      'الإصدار 4.0 · مدعوم بـ Llama 3.3',
-    login:        'تسجيل الدخول',
-    logout:       'تسجيل الخروج',
-    memory:       'الذاكرة',
-    memoryLabel:  'معلومات تريدني أتذكرها',
-    memoryPlaceholder: 'مثال: أنا مهندس برمجيات، أفضّل الشرح بأمثلة عملية...',
-    memoryHint:   'هذه المعلومات تُرسل في كل محادثة لأفهمك أفضل',
-    welcomeTitle: 'كيف يمكنني مساعدتك؟',
-    welcomeSub:   'اسألني عن أي شيء — أكتب، أحلل، أترجم، أبرمج، وأنشئ ملفات',
-    language:     'لغة الواجهة',
-    shortLabel:   'مختصر',
-    mediumLabel:  'متوازن',
-    longLabel:    'مفصّل',
-    formalLabel:  'فصحى رسمية',
-    saudiLabel:   'سعودي عامي',
-    casualLabel:  'عربي بسيط',
-    copy:         'نسخ',
-    copied:       '✓ تم',
-    download:     '⬇️ تحميل',
-    deleteChat:   'حذف',
-    confirmDelete:'تأكيد حذف جميع المحادثات؟',
-    confirmLogout:'تأكيد تسجيل الخروج؟',
+    newChat:        'محادثة جديدة',
+    historyLabel:   'المحادثات السابقة',
+    noHistory:      'لا توجد محادثات سابقة',
+    guest:          'زائر',
+    guestStatus:    'تصفح كزائر',
+    placeholder:    'اكتب رسالتك...',
+    disclaimer:     'آمرني قد يُخطئ أحياناً — يُرجى التحقق من المعلومات المهمة',
+    settings:       'الإعدادات',
+    lbl_account:    'الحساب',
+    lbl_lang:       'لغة الواجهة',
+    lbl_appearance: 'المظهر',
+    darkMode:       'الوضع الداكن',
+    lbl_responses:  'الردود',
+    lbl_style:      'أسلوب الرد',
+    lbl_length:     'طول الرد',
+    lbl_memory:     'الذاكرة',
+    memoryDesc:     'معلومات تريدني أتذكرها في كل محادثة',
+    memoryHint:     'تُضاف هذه المعلومات في كل محادثة لأفهمك أفضل',
+    memoryPlaceholder: 'مثال: أنا مطور برمجيات، أفضّل الشرح بأمثلة عملية...',
+    saveMemory:     'حفظ',
+    lbl_chats:      'المحادثات',
+    autosave:       'حفظ تلقائي',
+    deleteAll:      '🗑 حذف جميع المحادثات',
+    lbl_about:      'عن التطبيق',
+    aboutVer:       'الإصدار 8.0 · PDF · Word · Excel · PPT',
+    login:          'تسجيل الدخول',
+    logout:         'تسجيل الخروج',
+    welcomeTitle:   'كيف يمكنني مساعدتك؟',
+    welcomeSub:     'اسألني عن أي شيء — أكتب، أحلل، أترجم، أبرمج، وأنشئ ملفات',
+    copy:           'نسخ',
+    copied:         '✓ تم',
+    download:       '⬇ تحميل',
+    confirmDelete:  'تأكيد حذف جميع المحادثات؟',
+    confirmLogout:  'تأكيد تسجيل الخروج؟',
+    generating:     (type) => `جارٍ إنشاء ملف ${type}...`,
+    genReady:       (type) => `ملف ${type} جاهز ✅`,
+    genFailed:      'فشل إنشاء الملف',
+    analyzeImage:   'حلل هذه الصورة',
+    styleOpts:      [['formal','فصحى رسمية'],['saudi','سعودي عامي'],['casual','عربي بسيط']],
+    lengthOpts:     [['short','مختصر'],['medium','متوازن'],['long','مفصّل']],
   },
   en: {
-    newChat:      'New Chat',
-    suggestions:  'Suggestions',
-    history:      'Recent Chats',
-    noHistory:    'No chats yet',
-    guest:        'Guest',
-    guestStatus:  'Browsing as guest',
-    placeholder:  'Message Amerni...',
-    hint:         'Amerni can make mistakes — verify important information',
-    settings:     'Settings',
-    account:      'Account',
-    appearance:   'Appearance',
-    darkMode:     'Dark Mode',
-    accentColor:  'Accent Color',
-    responseStyle:'Response Style',
-    styleLabel:   'Style',
-    lengthLabel:  'Response Length',
-    chats:        'Chats',
-    autoSave:     'Auto-save Chats',
-    deleteAll:    'Delete All Chats',
-    about:        'About',
-    version:      'Version 4.0 · Powered by Llama 3.3',
-    login:        'Sign In',
-    logout:       'Sign Out',
-    memory:       'Memory',
-    memoryLabel:  'Information you want me to remember',
+    newChat:        'New Chat',
+    historyLabel:   'Recent Chats',
+    noHistory:      'No chats yet',
+    guest:          'Guest',
+    guestStatus:    'Browsing as guest',
+    placeholder:    'Message Amerni...',
+    disclaimer:     'Amerni can make mistakes — please verify important information',
+    settings:       'Settings',
+    lbl_account:    'Account',
+    lbl_lang:       'Interface Language',
+    lbl_appearance: 'Appearance',
+    darkMode:       'Dark Mode',
+    lbl_responses:  'Responses',
+    lbl_style:      'Response Style',
+    lbl_length:     'Response Length',
+    lbl_memory:     'Memory',
+    memoryDesc:     'Information you want me to remember',
+    memoryHint:     'This info is included in every chat so I understand you better',
     memoryPlaceholder: 'Example: I\'m a software engineer, I prefer practical examples...',
-    memoryHint:   'This info is sent with every chat so I understand you better',
-    welcomeTitle: 'How can I help you?',
-    welcomeSub:   'Ask me anything — write, analyze, translate, code, and create files',
-    language:     'Interface Language',
-    shortLabel:   'Short',
-    mediumLabel:  'Balanced',
-    longLabel:    'Detailed',
-    formalLabel:  'Formal',
-    saudiLabel:   'Saudi Dialect',
-    casualLabel:  'Casual',
-    copy:         'Copy',
-    copied:       '✓ Done',
-    download:     '⬇️ Download',
-    deleteChat:   'Delete',
-    confirmDelete:'Delete all chats?',
-    confirmLogout:'Sign out?',
+    saveMemory:     'Save',
+    lbl_chats:      'Chats',
+    autosave:       'Auto-save',
+    deleteAll:      '🗑 Delete All Chats',
+    lbl_about:      'About',
+    aboutVer:       'Version 8.0 · PDF · Word · Excel · PPT',
+    login:          'Sign In',
+    logout:         'Sign Out',
+    welcomeTitle:   'How can I help you?',
+    welcomeSub:     'Ask me anything — write, analyze, translate, code, and create files',
+    copy:           'Copy',
+    copied:         '✓ Done',
+    download:       '⬇ Download',
+    confirmDelete:  'Delete all chats?',
+    confirmLogout:  'Sign out?',
+    generating:     (type) => `Generating ${type} file...`,
+    genReady:       (type) => `${type} file ready ✅`,
+    genFailed:      'File generation failed',
+    analyzeImage:   'Analyze this image',
+    styleOpts:      [['formal','Formal'],['casual','Casual']],
+    lengthOpts:     [['short','Short'],['medium','Balanced'],['long','Detailed']],
   }
 };
 
-function t(key) { return UI[SETTINGS.lang]?.[key] || UI.ar[key] || key; }
+function t(key, ...args) {
+  const val = UI[SETTINGS.lang]?.[key] ?? UI.ar[key] ?? key;
+  return typeof val === 'function' ? val(...args) : val;
+}
 
-// ══════════════════════════════════════
-//  تهيئة
-// ══════════════════════════════════════
+// ════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', () => {
-  // ربط زر الزائر
-  setTimeout(() => {
-    const gb = document.getElementById('guest-btn');
-    if (gb) gb.onclick = function(e) { e.preventDefault(); loginAsGuest(); };
-  }, 200);
   loadSettings();
   checkAuth();
   if (typeof marked !== 'undefined') {
@@ -133,67 +126,103 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// ══════════════════════════════════════
-//  تسجيل الدخول
-// ══════════════════════════════════════
+// ════════════════════════════════════════
+//  AUTH
+// ════════════════════════════════════════
 function checkAuth() {
   const saved = localStorage.getItem('amerni_user');
-  if (saved) { STATE.user = JSON.parse(saved); enterApp(); }
+  if (saved) {
+    try { STATE.user = JSON.parse(saved); enterApp(); } catch { localStorage.removeItem('amerni_user'); }
+  }
 }
 
 function handleGoogleLogin(response) {
   try {
-    const base64 = response.credential.split('.')[1];
-    const pad = base64.length % 4 === 0 ? base64 : base64 + '==='.slice(0, 4 - base64.length % 4);
-    const payload = JSON.parse(atob(pad.replace(/-/g, '+').replace(/_/g, '/')));
-    STATE.user = { name: payload.name || 'Google User', email: payload.email || '', photo: payload.picture || null, type: 'google' };
+    const raw   = response.credential.split('.')[1];
+    const pad   = raw + '==='.slice(0, (4 - raw.length % 4) % 4);
+    const data  = JSON.parse(atob(pad.replace(/-/g,'+').replace(/_/g,'/')));
+    STATE.user  = { name: data.name || 'Google User', email: data.email || '', photo: data.picture || null, type: 'google' };
     localStorage.setItem('amerni_user', JSON.stringify(STATE.user));
     enterApp();
   } catch (err) { alert('Login error: ' + err.message); }
 }
 
 function loginAsGuest() {
-  const guestName = SETTINGS.lang === 'en' ? 'Guest' : 'زائر';
-  STATE.user = { name: guestName, email: '', photo: null, type: 'guest' };
+  STATE.user = { name: t('guest'), email: '', photo: null, type: 'guest' };
   enterApp();
 }
 
+function loginWithApple() {
+  const msg = SETTINGS.lang === 'en'
+    ? 'Apple Sign In requires a registered custom domain in Apple Developer Console.\n\nUse Google or continue as Guest for now.'
+    : 'تسجيل الدخول بـ Apple يتطلب ربط نطاق مخصص في Apple Developer Console.\n\nيمكنك استخدام Google أو المتابعة كزائر.';
+  alert(msg);
+}
+
+document.addEventListener('AppleIDSignInOnSuccess', (e) => {
+  const d = e.detail;
+  STATE.user = {
+    name:  d.user ? `${d.user.name?.firstName||''} ${d.user.name?.lastName||''}`.trim() || 'Apple User' : 'Apple User',
+    email: d.user?.email || '',
+    photo: null, type: 'apple'
+  };
+  localStorage.setItem('amerni_user', JSON.stringify(STATE.user));
+  enterApp();
+});
+
 function enterApp() {
   document.getElementById('login-screen').style.display = 'none';
-  document.getElementById('app').style.display = 'flex';
-  applyLang();
+  const app = document.getElementById('app');
+  app.style.display = 'flex';
+
+  // Show sidebar on desktop, hide on mobile by default
+  const sidebar = document.getElementById('sidebar');
+  if (window.innerWidth <= 640) {
+    sidebar.classList.add('hidden');
+  } else {
+    sidebar.classList.remove('hidden');
+  }
+
+  applyLang(false);
   updateUserUI();
   loadHistory();
-  document.getElementById('user-input').focus();
+  setTimeout(() => document.getElementById('user-input').focus(), 100);
 }
 
 function updateUserUI() {
   if (!STATE.user) return;
-  const name = STATE.user.name;
-  const initial = name.charAt(0).toUpperCase();
-  const photo = STATE.user.photo;
+  const { name, email, photo, type } = STATE.user;
+  const initial = (name || '?').charAt(0).toUpperCase();
+  const photoHTML = photo ? `<img src="${photo}" alt=""/>` : initial;
 
-  document.getElementById('user-name').textContent   = name;
-  document.getElementById('user-status').textContent = STATE.user.type === 'google' ? STATE.user.email : t('guestStatus');
+  // Sidebar user chip
+  const ua = document.getElementById('user-avatar');
+  const un = document.getElementById('user-name');
+  const us = document.getElementById('user-status');
+  if (ua) ua.innerHTML = photoHTML;
+  if (un) un.textContent = name;
+  if (us) us.textContent = type === 'google' || type === 'apple' ? (email || type) : t('guestStatus');
 
-  ['user-avatar', 'acc-avatar'].forEach(id => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.innerHTML = photo
-      ? `<img src="${photo}" style="width:100%;height:100%;border-radius:50%;object-fit:cover"/>`
-      : initial;
-  });
-
-  document.getElementById('acc-name').textContent  = name;
-  document.getElementById('acc-email').textContent = STATE.user.email || (t('guestStatus'));
-  const btn = document.getElementById('acc-btn');
-  btn.textContent = STATE.user.type === 'guest' ? t('login') : t('logout');
-  if (STATE.user.type !== 'guest') btn.classList.add('logout');
-  else btn.classList.remove('logout');
+  // Settings account card
+  const sa = document.getElementById('acc-avatar');
+  const sn = document.getElementById('acc-name');
+  const se = document.getElementById('acc-email');
+  const sb = document.getElementById('acc-action-btn');
+  if (sa) sa.innerHTML = photoHTML;
+  if (sn) sn.textContent = name;
+  if (se) se.textContent = email || (type === 'guest' ? t('guestStatus') : '');
+  if (sb) {
+    sb.textContent = type === 'guest' ? t('login') : t('logout');
+    sb.className   = 's-account-btn' + (type !== 'guest' ? ' logout' : '');
+  }
 }
 
-function toggleLogin() {
-  if (STATE.user?.type === 'google') {
+function handleAccountAction() {
+  if (STATE.user?.type === 'guest') {
+    closeSettings();
+    document.getElementById('app').style.display = 'none';
+    document.getElementById('login-screen').style.display = 'flex';
+  } else {
     if (confirm(t('confirmLogout'))) {
       localStorage.removeItem('amerni_user');
       STATE.user = null;
@@ -201,25 +230,22 @@ function toggleLogin() {
       document.getElementById('app').style.display = 'none';
       document.getElementById('login-screen').style.display = 'flex';
     }
-  } else {
-    closeSettings();
-    document.getElementById('app').style.display = 'none';
-    document.getElementById('login-screen').style.display = 'flex';
   }
 }
 
-// ══════════════════════════════════════
-//  إرسال رسالة
-// ══════════════════════════════════════
+// ════════════════════════════════════════
+//  SEND MESSAGE
+// ════════════════════════════════════════
 async function sendMessage() {
   if (STATE.isLoading) return;
   const input   = document.getElementById('user-input');
   const content = input.value.trim();
   if (!content && !STATE.imageBase64) return;
 
+  // Hide welcome
   document.getElementById('welcome').style.display = 'none';
 
-  const userMsg = { role: 'user', content: content || (SETTINGS.lang === 'en' ? 'Analyze this image' : 'حلل هذه الصورة') };
+  const userMsg = { role: 'user', content: content || t('analyzeImage') };
   STATE.messages.push(userMsg);
   appendUserMsg(content, STATE.imageBase64);
 
@@ -227,40 +253,37 @@ async function sendMessage() {
   autoResize(input);
   removeImage();
 
-  const typingId = showTyping();
   STATE.isLoading = true;
   document.getElementById('send-btn').disabled = true;
+  const typingId = showTyping();
 
   try {
     const memory = localStorage.getItem('amerni_memory') || '';
 
     const res = await fetch('/api/chat', {
-      method: 'POST',
+      method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         messages: STATE.messages,
-        style:    SETTINGS.style || 'formal',
-        length:   SETTINGS.length,
+        style:    SETTINGS.style  || 'formal',
+        length:   SETTINGS.length || 'medium',
         lang:     SETTINGS.lang,
         userName: STATE.user?.name || t('guest'),
         memory,
       }),
     });
 
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
-    if (!res.ok || data.error) throw new Error(data.error || 'Connection error');
+    if (data.error) throw new Error(data.error);
 
     removeTyping(typingId);
-    const aiMsg = { role: 'assistant', content: data.reply };
-    STATE.messages.push(aiMsg);
+    STATE.messages.push({ role: 'assistant', content: data.reply });
     await appendAIMsgTyping(data.reply);
 
-    // ── Handle professional file generation ──
-    if (data.generateData) {
-      await handleFileGeneration(data.generateData, data.reply);
-    }
+    if (data.generateData) await handleFileGeneration(data.generateData, data.reply);
+    if (data.fileData)     appendFileCard(data.fileData);
 
-    if (data.fileData) appendFileCard(data.fileData);
     saveChat(content);
 
   } catch (err) {
@@ -273,31 +296,40 @@ async function sendMessage() {
   input.focus();
 }
 
-// ══════════════════════════════════════
-//  عرض الرسائل
-// ══════════════════════════════════════
+function quickSend(text) {
+  document.getElementById('welcome').style.display = 'none';
+  const inp = document.getElementById('user-input');
+  inp.value = text;
+  autoResize(inp);
+  sendMessage();
+  if (window.innerWidth <= 640) closeSidebar();
+}
+
+// ════════════════════════════════════════
+//  MESSAGE RENDERING
+// ════════════════════════════════════════
 function appendUserMsg(text, img64) {
-  const c = document.getElementById('messages');
+  const c = document.getElementById('msgs');
   const d = document.createElement('div');
   d.className = 'msg user';
-  const initial = STATE.user?.name?.charAt(0)?.toUpperCase() || 'U';
   const photo   = STATE.user?.photo;
+  const initial = (STATE.user?.name || 'U').charAt(0).toUpperCase();
   d.innerHTML = `
-    <div class="msg-av user-av">${photo ? `<img src="${photo}" style="width:100%;height:100%;border-radius:50%;object-fit:cover"/>` : initial}</div>
+    <div class="msg-av user-av">${photo ? `<img src="${photo}" alt=""/>` : initial}</div>
     <div class="msg-content">
-      ${img64 ? `<img src="data:image/jpeg;base64,${img64}" class="msg-image" alt="image"/>` : ''}
-      ${text ? `<div class="msg-bubble">${esc(text)}</div>` : ''}
+      ${img64 ? `<img src="data:image/jpeg;base64,${img64}" class="msg-image" alt=""/>` : ''}
+      ${text  ? `<div class="msg-bubble">${esc(text)}</div>` : ''}
     </div>`;
   c.appendChild(d); scrollDown();
 }
 
 function appendAIMsg(text) {
-  const c = document.getElementById('messages');
+  const c = document.getElementById('msgs');
   const d = document.createElement('div');
   d.className = 'msg ai';
-  const html = typeof marked !== 'undefined' ? marked.parse(text) : esc(text).replace(/\n/g,'<br/>');
+  const html = parseMarkdown(text);
   d.innerHTML = `
-    <div class="msg-av ai-av">A</div>
+    <div class="msg-av ai-av"><img src="logo.png" alt=""/></div>
     <div class="msg-content">
       <div class="msg-bubble">${html}</div>
       <div class="msg-actions">
@@ -305,19 +337,20 @@ function appendAIMsg(text) {
       </div>
     </div>`;
   c.appendChild(d);
-  d.querySelectorAll('pre code').forEach(el => addCopyCodeBtn(el.parentElement));
-  scrollDown(); return d;
+  d.querySelectorAll('pre code').forEach(el => addCopyCodeBtn(el.closest('pre')));
+  scrollDown();
+  return d;
 }
 
 async function appendAIMsgTyping(text) {
-  const c = document.getElementById('messages');
+  const c = document.getElementById('msgs');
   const d = document.createElement('div');
   d.className = 'msg ai';
   d.innerHTML = `
-    <div class="msg-av ai-av">A</div>
+    <div class="msg-av ai-av"><img src="logo.png" alt=""/></div>
     <div class="msg-content">
-      <div class="msg-bubble typing-text"></div>
-      <div class="msg-actions" style="display:none">
+      <div class="msg-bubble"></div>
+      <div class="msg-actions" style="opacity:0;pointer-events:none">
         <button class="action-btn" onclick="copyMsg(this)">${t('copy')}</button>
       </div>
     </div>`;
@@ -325,26 +358,33 @@ async function appendAIMsgTyping(text) {
 
   const bubble  = d.querySelector('.msg-bubble');
   const actions = d.querySelector('.msg-actions');
-  const html = typeof marked !== 'undefined' ? marked.parse(text) : esc(text).replace(/\n/g,'<br/>');
+  bubble.style.opacity    = '0';
+  bubble.style.transition = 'opacity .22s ease';
+  bubble.innerHTML        = parseMarkdown(text);
 
-  bubble.style.opacity = '0';
-  bubble.innerHTML = html;
-  bubble.style.transition = 'opacity 0.25s ease';
-  await new Promise(r => setTimeout(r, 30));
-  bubble.style.opacity = '1';
-  actions.style.display = '';
+  await new Promise(r => setTimeout(r, 25));
+  bubble.style.opacity    = '1';
+  actions.style.opacity   = '';
+  actions.style.pointerEvents = '';
 
-  d.querySelectorAll('pre code').forEach(el => addCopyCodeBtn(el.parentElement));
-  scrollDown(); return d;
+  d.querySelectorAll('pre code').forEach(el => addCopyCodeBtn(el.closest('pre')));
+  scrollDown();
+  return d;
+}
+
+function parseMarkdown(text) {
+  if (typeof marked !== 'undefined') return marked.parse(text);
+  return esc(text).replace(/\n/g, '<br/>');
 }
 
 function addCopyCodeBtn(preEl) {
-  if (preEl.querySelector('.copy-code-btn')) return;
+  if (!preEl || preEl.querySelector('.copy-code-btn')) return;
   const btn = document.createElement('button');
-  btn.className = 'copy-code-btn';
+  btn.className   = 'copy-code-btn';
   btn.textContent = t('copy');
   btn.onclick = () => {
-    navigator.clipboard.writeText(preEl.querySelector('code')?.textContent || '').then(() => {
+    const code = preEl.querySelector('code')?.textContent || '';
+    navigator.clipboard.writeText(code).then(() => {
       btn.textContent = t('copied');
       setTimeout(() => btn.textContent = t('copy'), 2000);
     });
@@ -354,21 +394,45 @@ function addCopyCodeBtn(preEl) {
 }
 
 function copyMsg(btn) {
-  const text = btn.closest('.msg-content').querySelector('.msg-bubble').innerText;
+  const text = btn.closest('.msg-content')?.querySelector('.msg-bubble')?.innerText || '';
   navigator.clipboard.writeText(text).then(() => {
     btn.textContent = t('copied');
     setTimeout(() => btn.textContent = t('copy'), 2000);
   });
 }
 
+// ════════════════════════════════════════
+//  TYPING INDICATOR
+// ════════════════════════════════════════
+let _typingN = 0;
+function showTyping() {
+  const id = `tp-${++_typingN}`;
+  const c  = document.getElementById('msgs');
+  const d  = document.createElement('div');
+  d.id = id; d.className = 'msg ai';
+  d.innerHTML = `
+    <div class="msg-av ai-av"><img src="logo.png" alt=""/></div>
+    <div class="msg-content">
+      <div class="msg-bubble">
+        <div class="typing"><span></span><span></span><span></span></div>
+      </div>
+    </div>`;
+  c.appendChild(d); scrollDown(); return id;
+}
+function removeTyping(id) { document.getElementById(id)?.remove(); }
+
+// ════════════════════════════════════════
+//  FILE CARDS
+// ════════════════════════════════════════
 function appendFileCard(fileData) {
-  const c = document.getElementById('messages');
+  const c = document.getElementById('msgs');
   const d = document.createElement('div');
   d.className = 'msg ai';
-  const ext = fileData.name.split('.').pop().toLowerCase();
+  const ext   = fileData.name.split('.').pop().toLowerCase();
   const icons = { txt:'📄', md:'📝', html:'🌐', json:'🔧', csv:'📊', js:'💻', py:'🐍' };
+  const b64   = btoa(unescape(encodeURIComponent(fileData.content)));
   d.innerHTML = `
-    <div class="msg-av ai-av">A</div>
+    <div class="msg-av ai-av"><img src="logo.png" alt=""/></div>
     <div class="msg-content">
       <div class="file-card">
         <div class="file-card-icon">${icons[ext]||'📄'}</div>
@@ -376,27 +440,51 @@ function appendFileCard(fileData) {
           <div class="file-card-name">${esc(fileData.name)}</div>
           <div class="file-card-size">${fileData.content.length} chars</div>
         </div>
-        <button class="file-card-btn" onclick="downloadFile('${esc(fileData.name)}','${btoa(unescape(encodeURIComponent(fileData.content)))}')">${t('download')}</button>
+        <button class="file-card-btn" onclick="downloadFile('${esc(fileData.name)}','${b64}')">${t('download')}</button>
       </div>
     </div>`;
   c.appendChild(d); scrollDown();
 }
 
-// ══════════════════════════════════════
-//  توليد الملفات الاحترافية
-// ══════════════════════════════════════
-async function handleFileGeneration(genData, contentText) {
-  const isEn = SETTINGS.lang === 'en';
-  const typeLabels = { pdf: 'PDF', docx: 'Word', xlsx: 'Excel', pptx: 'PowerPoint' };
-  const typeLabel  = typeLabels[genData.type] || genData.type.toUpperCase();
+function downloadFile(name, b64) {
+  try {
+    const content = decodeURIComponent(escape(atob(b64)));
+    const a = document.createElement('a');
+    a.href     = URL.createObjectURL(new Blob([content], { type: 'text/plain;charset=utf-8' }));
+    a.download = name; a.click();
+  } catch { alert(SETTINGS.lang === 'en' ? 'Download failed' : 'فشل التحميل'); }
+}
 
-  // Show generating card
-  const cardId = 'gen-' + Date.now();
-  appendGeneratingCard(cardId, typeLabel, genData.filename, genData.type);
+// ════════════════════════════════════════
+//  PROFESSIONAL FILE GENERATION
+// ════════════════════════════════════════
+async function handleFileGeneration(genData, contentText) {
+  const typeLabel = { pdf:'PDF', docx:'Word', xlsx:'Excel', pptx:'PowerPoint' }[genData.type] || genData.type.toUpperCase();
+  const icons     = { pdf:'📄', docx:'📝', xlsx:'📊', pptx:'📑' };
+  const icon      = icons[genData.type] || '📄';
+  const cardId    = 'gen-' + Date.now();
+
+  // Insert loading card
+  const c = document.getElementById('msgs');
+  const d = document.createElement('div');
+  d.id = cardId; d.className = 'msg ai';
+  d.innerHTML = `
+    <div class="msg-av ai-av"><img src="logo.png" alt=""/></div>
+    <div class="msg-content">
+      <div class="gen-card" id="${cardId}-card">
+        <div class="gen-card-icon">${icon}</div>
+        <div class="gen-card-info">
+          <div class="gen-card-name">${esc(genData.filename||'document')}.${genData.type}</div>
+          <div class="gen-card-status">${t('generating', typeLabel)}</div>
+        </div>
+        <div class="gen-spinner"></div>
+      </div>
+    </div>`;
+  c.appendChild(d); scrollDown();
 
   try {
     const res = await fetch('/api/generate', {
-      method: 'POST',
+      method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         type:     genData.type,
@@ -405,109 +493,71 @@ async function handleFileGeneration(genData, contentText) {
         lang:     genData.lang || SETTINGS.lang,
       }),
     });
-
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
     const blob     = await res.blob();
     const url      = URL.createObjectURL(blob);
-    const ext      = genData.type;
-    const filename = `${genData.filename || 'document'}.${ext}`;
+    const isPDF    = genData.type === 'pdf';
+    // PDF is actually an HTML file that triggers print dialog — open in new tab
+    // Other formats download directly
+    const filename = `${genData.filename||'document'}.${isPDF ? 'html' : genData.type}`;
+    const displayName = `${genData.filename||'document'}.pdf`;
 
-    updateGeneratingCard(cardId, filename, url, typeLabel);
-
+    const card = document.getElementById(`${cardId}-card`);
+    if (card) {
+      card.className = 'gen-card ready';
+      if (isPDF) {
+        // Open in new tab → print dialog auto-fires → user saves as PDF
+        card.innerHTML = `
+          <div class="gen-card-icon">✅</div>
+          <div class="gen-card-info">
+            <div class="gen-card-name">${esc(displayName)}</div>
+            <div class="gen-card-status done">${t('genReady', typeLabel)}</div>
+          </div>
+          <a class="file-card-btn" href="${url}" target="_blank" rel="noopener">${t('download')}</a>`;
+      } else {
+        card.innerHTML = `
+          <div class="gen-card-icon">✅</div>
+          <div class="gen-card-info">
+            <div class="gen-card-name">${esc(filename)}</div>
+            <div class="gen-card-status done">${t('genReady', typeLabel)}</div>
+          </div>
+          <a class="file-card-btn" href="${url}" download="${esc(filename)}">${t('download')}</a>`;
+      }
+      scrollDown();
+    }
   } catch (err) {
-    failGeneratingCard(cardId, err.message);
+    const card = document.getElementById(`${cardId}-card`);
+    if (card) {
+      card.className = 'gen-card failed';
+      card.innerHTML = `
+        <div class="gen-card-icon">⚠️</div>
+        <div class="gen-card-info">
+          <div class="gen-card-name">${t('genFailed')}</div>
+          <div class="gen-card-status fail">${esc(err.message)}</div>
+        </div>`;
+    }
   }
 }
 
-function appendGeneratingCard(id, typeLabel, filename, type) {
-  const icons = { pdf: '📄', docx: '📝', xlsx: '📊', pptx: '📑' };
-  const icon  = icons[type] || '📄';
-  const isEn  = SETTINGS.lang === 'en';
-  const loadingText = isEn ? `Generating ${typeLabel} file...` : `جارٍ إنشاء ملف ${typeLabel}...`;
-
-  const c = document.getElementById('messages');
-  const d = document.createElement('div');
-  d.className = 'msg ai'; d.id = id;
-  d.innerHTML = `
-    <div class="msg-av ai-av"><img src="logo.png" alt=""/></div>
-    <div class="msg-content">
-      <div class="gen-card" id="${id}-card">
-        <div class="gen-card-icon">${icon}</div>
-        <div class="gen-card-info">
-          <div class="gen-card-name">${esc(filename || 'document')}.${type}</div>
-          <div class="gen-card-status loading">${loadingText}</div>
-        </div>
-        <div class="gen-spinner"></div>
-      </div>
-    </div>`;
-  c.appendChild(d); scrollDown();
-}
-
-function updateGeneratingCard(id, filename, url, typeLabel) {
-  const isEn  = SETTINGS.lang === 'en';
-  const ready = isEn ? `${typeLabel} file ready ✅` : `ملف ${typeLabel} جاهز ✅`;
-  const dlBtn = isEn ? '⬇ Download' : '⬇ تحميل';
-
-  const card = document.getElementById(`${id}-card`);
-  if (!card) return;
-  card.innerHTML = `
-    <div class="gen-card-icon">✅</div>
-    <div class="gen-card-info">
-      <div class="gen-card-name">${esc(filename)}</div>
-      <div class="gen-card-status done">${ready}</div>
-    </div>
-    <a class="file-card-btn" href="${url}" download="${esc(filename)}">${dlBtn}</a>`;
-  scrollDown();
-}
-
-function failGeneratingCard(id, errMsg) {
-  const isEn = SETTINGS.lang === 'en';
-  const card = document.getElementById(`${id}-card`);
-  if (!card) return;
-  card.innerHTML = `
-    <div class="gen-card-icon">⚠️</div>
-    <div class="gen-card-info">
-      <div class="gen-card-name">${isEn ? 'Generation failed' : 'فشل إنشاء الملف'}</div>
-      <div class="gen-card-status fail">${esc(errMsg)}</div>
-    </div>`;
-}
-
-function downloadFile(name, b64) {
-  try {
-    const content = decodeURIComponent(escape(atob(b64)));
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([content], { type: 'text/plain;charset=utf-8' }));
-    a.download = name; a.click();
-  } catch { alert('Download failed'); }
-}
-
-let typingCount = 0;
-function showTyping() {
-  const id = `tp-${++typingCount}`;
-  const c  = document.getElementById('messages');
-  const d  = document.createElement('div');
-  d.className = 'msg ai'; d.id = id;
-  d.innerHTML = `<div class="msg-av ai-av">A</div><div class="msg-content"><div class="msg-bubble"><div class="typing"><span></span><span></span><span></span></div></div></div>`;
-  c.appendChild(d); scrollDown(); return id;
-}
-function removeTyping(id) { document.getElementById(id)?.remove(); }
-
-// ══════════════════════════════════════
-//  صورة
-// ══════════════════════════════════════
+// ════════════════════════════════════════
+//  IMAGE HANDLING
+// ════════════════════════════════════════
 function handleImage(e) {
   const file = e.target.files[0];
   if (!file) return;
-  if (file.size > 10 * 1024 * 1024) { alert('Max 10MB'); return; }
+  if (file.size > 10 * 1024 * 1024) {
+    alert(SETTINGS.lang === 'en' ? 'Max image size is 10MB' : 'الحجم الأقصى للصورة 10 ميغابايت');
+    return;
+  }
   STATE.imageMime = file.type;
   STATE.imageName = file.name;
   const r = new FileReader();
   r.onload = ev => {
     STATE.imageBase64 = ev.target.result.split(',')[1];
-    document.getElementById('img-thumb').src = ev.target.result;
+    document.getElementById('img-thumb').src       = ev.target.result;
     document.getElementById('img-name').textContent = file.name;
-    document.getElementById('img-bar').style.display = 'flex';
+    document.getElementById('img-preview').style.display = 'flex';
     document.getElementById('user-input').focus();
   };
   r.readAsDataURL(file);
@@ -516,38 +566,29 @@ function handleImage(e) {
 
 function removeImage() {
   STATE.imageBase64 = STATE.imageMime = STATE.imageName = null;
-  document.getElementById('img-bar').style.display = 'none';
+  document.getElementById('img-preview').style.display = 'none';
   document.getElementById('img-thumb').src = '';
+  document.getElementById('img-name').textContent = '';
 }
 
-// ══════════════════════════════════════
-//  اقتراحات
-// ══════════════════════════════════════
-function quickSend(text) {
-  document.getElementById('welcome').style.display = 'none';
-  document.getElementById('user-input').value = text;
-  autoResize(document.getElementById('user-input'));
-  sendMessage();
-  if (window.innerWidth <= 640) closeSidebar();
-}
-
-// ══════════════════════════════════════
-//  محادثة جديدة
-// ══════════════════════════════════════
+// ════════════════════════════════════════
+//  NEW CHAT
+// ════════════════════════════════════════
 function newChat() {
-  STATE.messages = []; STATE.currentChatId = null;
+  STATE.messages      = [];
+  STATE.currentChatId = null;
   removeImage();
-  document.getElementById('messages').innerHTML = '';
-  document.getElementById('welcome').style.display = 'flex';
-  document.getElementById('user-input').value = '';
-  document.querySelectorAll('.history-item').forEach(i => i.classList.remove('active'));
+  document.getElementById('msgs').innerHTML          = '';
+  document.getElementById('welcome').style.display   = 'flex';
+  document.getElementById('user-input').value        = '';
+  document.querySelectorAll('.h-item-btn').forEach(b => b.classList.remove('active'));
   if (window.innerWidth <= 640) closeSidebar();
-  document.getElementById('user-input').focus();
+  setTimeout(() => document.getElementById('user-input').focus(), 50);
 }
 
-// ══════════════════════════════════════
-//  المحادثات المحفوظة
-// ══════════════════════════════════════
+// ════════════════════════════════════════
+//  CHAT HISTORY
+// ════════════════════════════════════════
 function getChats() {
   try { return JSON.parse(localStorage.getItem('amerni_chats') || '[]'); } catch { return []; }
 }
@@ -556,10 +597,10 @@ function saveChat(firstMsg) {
   if (!SETTINGS.saveChats || !STATE.messages.length) return;
   if (!STATE.currentChatId) STATE.currentChatId = Date.now();
   const chats = getChats();
-  const title = firstMsg?.slice(0, 38) || (t('newChat'));
-  const existing = chats.findIndex(c => c.id === STATE.currentChatId);
-  const chat = { id: STATE.currentChatId, title, messages: STATE.messages, date: new Date().toLocaleDateString() };
-  if (existing >= 0) chats[existing] = chat; else chats.unshift(chat);
+  const title = (firstMsg || t('newChat')).slice(0, 40);
+  const chat  = { id: STATE.currentChatId, title, messages: STATE.messages, date: Date.now() };
+  const idx   = chats.findIndex(c => c.id === STATE.currentChatId);
+  if (idx >= 0) chats[idx] = chat; else chats.unshift(chat);
   localStorage.setItem('amerni_chats', JSON.stringify(chats.slice(0, 30)));
   loadHistory();
 }
@@ -567,21 +608,26 @@ function saveChat(firstMsg) {
 function loadHistory() {
   const chats = getChats();
   const el    = document.getElementById('history-list');
-  if (!chats.length) { el.innerHTML = `<div class="history-empty">${t('noHistory')}</div>`; return; }
-  el.innerHTML = chats.map(c =>
-    `<div class="history-item-wrap">
-      <button class="history-item ${c.id === STATE.currentChatId ? 'active' : ''}" onclick="openChat(${c.id})">💬 ${esc(c.title)}</button>
-      <button class="history-del" onclick="deleteChat(${c.id},event)">✕</button>
-    </div>`
-  ).join('');
+  if (!chats.length) {
+    el.innerHTML = `<p class="history-empty">${t('noHistory')}</p>`;
+    return;
+  }
+  el.innerHTML = chats.map(c => `
+    <div class="history-item-row">
+      <button class="h-item-btn ${c.id === STATE.currentChatId ? 'active' : ''}" onclick="openChat(${c.id})">💬 ${esc(c.title)}</button>
+      <button class="h-del-btn" onclick="deleteChat(${c.id},event)" title="حذف">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>`).join('');
 }
 
 function openChat(id) {
   const chat = getChats().find(c => c.id === id);
   if (!chat) return;
-  STATE.messages = [...chat.messages]; STATE.currentChatId = id;
-  document.getElementById('welcome').style.display  = 'none';
-  document.getElementById('messages').innerHTML     = '';
+  STATE.messages = [...chat.messages];
+  STATE.currentChatId = id;
+  document.getElementById('welcome').style.display = 'none';
+  document.getElementById('msgs').innerHTML = '';
   chat.messages.forEach(m => {
     if (m.role === 'user')      appendUserMsg(m.content, null);
     else if (m.role === 'assistant') appendAIMsg(m.content);
@@ -595,7 +641,7 @@ function deleteChat(id, e) {
   const chats = getChats().filter(c => c.id !== id);
   localStorage.setItem('amerni_chats', JSON.stringify(chats));
   if (STATE.currentChatId === id) newChat();
-  loadHistory();
+  else loadHistory();
 }
 
 function clearAllChats() {
@@ -604,170 +650,205 @@ function clearAllChats() {
   newChat(); loadHistory(); closeSettings();
 }
 
-// ══════════════════════════════════════
-//  الإعدادات
-// ══════════════════════════════════════
-function openSettings()  { document.getElementById('settings-overlay').style.display = 'flex'; loadMemoryInput(); }
-function closeSettings() { document.getElementById('settings-overlay').style.display = 'none'; }
-function closeSettingsOutside(e) { if (e.target === document.getElementById('settings-overlay')) closeSettings(); }
-
-function loadMemoryInput() {
+// ════════════════════════════════════════
+//  SETTINGS
+// ════════════════════════════════════════
+function openSettings() {
+  document.getElementById('settings-backdrop').style.display = 'flex';
+  // Load memory text
   const mem = document.getElementById('memory-input');
   if (mem) mem.value = localStorage.getItem('amerni_memory') || '';
+  // Sync toggles
+  const dt = document.getElementById('dark-toggle');
+  if (dt) dt.checked = SETTINGS.dark;
+  const at = document.getElementById('autosave-toggle');
+  if (at) at.checked = SETTINGS.saveChats;
+  // Sync selects
+  const ss = document.getElementById('style-select');
+  if (ss) ss.value = SETTINGS.style || 'formal';
+  const ls = document.getElementById('length-select');
+  if (ls) ls.value = SETTINGS.length || 'medium';
+  // Sync lang buttons
+  document.getElementById('lang-btn-ar')?.classList.toggle('active', SETTINGS.lang === 'ar');
+  document.getElementById('lang-btn-en')?.classList.toggle('active', SETTINGS.lang === 'en');
+}
+
+function closeSettings() {
+  document.getElementById('settings-backdrop').style.display = 'none';
+}
+
+function closeSettingsBackdrop(e) {
+  if (e.target === document.getElementById('settings-backdrop')) closeSettings();
 }
 
 function saveMemory() {
   const mem = document.getElementById('memory-input');
-  if (mem) localStorage.setItem('amerni_memory', mem.value.trim());
+  if (!mem) return;
+  localStorage.setItem('amerni_memory', mem.value.trim());
+  const span = document.getElementById('txt-save-memory');
+  if (span) {
+    const orig = span.textContent;
+    span.textContent = '✓';
+    setTimeout(() => span.textContent = t('saveMemory'), 1600);
+  }
 }
 
 function toggleTheme() {
   SETTINGS.dark = document.getElementById('dark-toggle').checked;
-  document.documentElement.setAttribute('data-theme', SETTINGS.dark ? 'dark' : '');
+  document.documentElement.setAttribute('data-theme', SETTINGS.dark ? 'dark' : 'light');
   saveSetting('dark', SETTINGS.dark);
 }
 
-function setAccent(btn, color, color2, light) {
-  document.querySelectorAll('.color-opt').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  SETTINGS.accent = { color, color2, light };
-  document.documentElement.style.setProperty('--acc',       color);
-  document.documentElement.style.setProperty('--acc2',      color2);
-  document.documentElement.style.setProperty('--acc-light', light);
-  document.documentElement.style.setProperty('--acc-glow',  light);
-  saveSetting('accent', SETTINGS.accent);
-}
-
-function saveStyle() {
+function saveResponseSettings() {
   const ss = document.getElementById('style-select');
   const ls = document.getElementById('length-select');
-  if (ss) { SETTINGS.style  = ss.value; saveSetting('style',  SETTINGS.style); }
-  if (ls) { SETTINGS.length = ls.value; saveSetting('length', SETTINGS.length); }
+  if (ss) { SETTINGS.style  = ss.value; saveSetting('style',  ss.value); }
+  if (ls) { SETTINGS.length = ls.value; saveSetting('length', ls.value); }
 }
 
 function setLang(lang) {
   SETTINGS.lang = lang;
   saveSetting('lang', lang);
-  document.getElementById('app').dir = lang === 'en' ? 'ltr' : 'rtl';
-  document.getElementById('app').lang = lang;
-  applyLang();
+  applyLang(true);
   closeSettings();
 }
 
-function applyLang() {
+function applyLang(reloadHistory = true) {
   const isEn = SETTINGS.lang === 'en';
-  document.getElementById('app').dir  = isEn ? 'ltr' : 'rtl';
-  document.getElementById('app').lang = SETTINGS.lang;
+  const app  = document.getElementById('app');
+  if (app) { app.dir = isEn ? 'ltr' : 'rtl'; app.lang = SETTINGS.lang; }
 
-  // Update dynamic text
-  const ui = {
-    'new-chat-btn-text':  t('newChat'),
-    'placeholder-text':   null,
-    'hint-text':          t('hint'),
-    'welcome-title':      t('welcomeTitle'),
-    'welcome-sub':        t('welcomeSub'),
+  // Textarea direction
+  const inp = document.getElementById('user-input');
+  if (inp) {
+    inp.placeholder = t('placeholder');
+    inp.dir = isEn ? 'ltr' : 'rtl';
+  }
+
+  // Text elements map
+  const elMap = {
+    'txt-new-chat':       t('newChat'),
+    'txt-history-label':  t('historyLabel'),
+    'txt-no-history':     t('noHistory'),
+    'txt-welcome-title':  null, // handled separately (has span)
+    'txt-welcome-sub':    t('welcomeSub'),
+    'txt-disclaimer':     t('disclaimer'),
+    'txt-settings':       t('settings'),
+    'txt-lbl-account':    t('lbl_account'),
+    'txt-lbl-lang':       t('lbl_lang'),
+    'txt-lbl-appearance': t('lbl_appearance'),
+    'txt-dark-mode':      t('darkMode'),
+    'txt-lbl-responses':  t('lbl_responses'),
+    'txt-lbl-style':      t('lbl_style'),
+    'txt-lbl-length':     t('lbl_length'),
+    'txt-lbl-memory':     t('lbl_memory'),
+    'txt-memory-desc':    t('memoryDesc'),
+    'txt-memory-hint':    t('memoryHint'),
+    'txt-save-memory':    t('saveMemory'),
+    'txt-lbl-chats':      t('lbl_chats'),
+    'txt-autosave':       t('autosave'),
+    'txt-delete-all':     t('deleteAll'),
+    'txt-lbl-about':      t('lbl_about'),
+    'txt-about-ver':      t('aboutVer'),
   };
 
-  const inp = document.getElementById('user-input');
-  if (inp) inp.placeholder = t('placeholder');
+  Object.entries(elMap).forEach(([id, text]) => {
+    if (text === null) return;
+    const el = document.getElementById(id);
+    if (el) el.textContent = text;
+  });
 
-  const hint = document.getElementById('input-hint');
-  if (hint) hint.textContent = t('hint');
+  // Welcome title with gradient span
+  const wt = document.getElementById('txt-welcome-title');
+  if (wt) {
+    const titles = {
+      ar: 'كيف يمكنني <span>مساعدتك؟</span>',
+      en: 'How can I <span>help you?</span>',
+    };
+    wt.innerHTML = titles[SETTINGS.lang] || titles.ar;
+  }
 
-  const wt = document.getElementById('welcome-title');
-  if (wt) wt.textContent = t('welcomeTitle');
+  // Memory placeholder
+  const mi = document.getElementById('memory-input');
+  if (mi) mi.placeholder = t('memoryPlaceholder');
 
-  const ws = document.getElementById('welcome-sub');
-  if (ws) ws.textContent = t('welcomeSub');
-
-  // Update style options
+  // Rebuild style & length select options
   const ss = document.getElementById('style-select');
   if (ss) {
-    ss.innerHTML = isEn
-      ? `<option value="formal" ${SETTINGS.style==='formal'?'selected':''}>Formal</option>
-         <option value="casual" ${SETTINGS.style==='casual'?'selected':''}>Casual</option>`
-      : `<option value="formal" ${SETTINGS.style==='formal'?'selected':''}>فصحى رسمية</option>
-         <option value="saudi"  ${SETTINGS.style==='saudi' ?'selected':''}>سعودي عامي</option>
-         <option value="casual" ${SETTINGS.style==='casual'?'selected':''}>عربي بسيط</option>`;
+    ss.innerHTML = t('styleOpts').map(([v,l]) =>
+      `<option value="${v}" ${SETTINGS.style===v?'selected':''}>${l}</option>`
+    ).join('');
   }
-
   const ls = document.getElementById('length-select');
   if (ls) {
-    ls.innerHTML = isEn
-      ? `<option value="short"  ${SETTINGS.length==='short' ?'selected':''}>Short</option>
-         <option value="medium" ${SETTINGS.length==='medium'?'selected':''}>Balanced</option>
-         <option value="long"   ${SETTINGS.length==='long'  ?'selected':''}>Detailed</option>`
-      : `<option value="short"  ${SETTINGS.length==='short' ?'selected':''}>مختصر</option>
-         <option value="medium" ${SETTINGS.length==='medium'?'selected':''}>متوازن</option>
-         <option value="long"   ${SETTINGS.length==='long'  ?'selected':''}>مفصّل</option>`;
+    ls.innerHTML = t('lengthOpts').map(([v,l]) =>
+      `<option value="${v}" ${SETTINGS.length===v?'selected':''}>${l}</option>`
+    ).join('');
   }
 
-  loadHistory();
+  // Lang buttons
+  document.getElementById('lang-btn-ar')?.classList.toggle('active', !isEn);
+  document.getElementById('lang-btn-en')?.classList.toggle('active', isEn);
+
+  if (reloadHistory) loadHistory();
+  updateUserUI();
 }
 
 function saveSetting(key, val) {
   const s = JSON.parse(localStorage.getItem('amerni_settings') || '{}');
-  s[key] = val; localStorage.setItem('amerni_settings', JSON.stringify(s));
+  s[key] = val;
+  localStorage.setItem('amerni_settings', JSON.stringify(s));
 }
 
 function loadSettings() {
-  const saved = JSON.parse(localStorage.getItem('amerni_settings') || '{}');
-  if (saved.dark      !== undefined) SETTINGS.dark      = saved.dark;
-  if (saved.accent)                  SETTINGS.accent     = saved.accent;
-  if (saved.style)                   SETTINGS.style      = saved.style;
-  if (saved.length)                  SETTINGS.length     = saved.length;
-  if (saved.lang)                    SETTINGS.lang       = saved.lang;
-  if (saved.saveChats !== undefined) SETTINGS.saveChats  = saved.saveChats;
+  const s = JSON.parse(localStorage.getItem('amerni_settings') || '{}');
+  if (s.dark      !== undefined) SETTINGS.dark      = s.dark;
+  if (s.lang)                    SETTINGS.lang       = s.lang;
+  if (s.style)                   SETTINGS.style      = s.style;
+  if (s.length)                  SETTINGS.length     = s.length;
+  if (s.saveChats !== undefined) SETTINGS.saveChats  = s.saveChats;
 
-  if (SETTINGS.dark) {
-    document.documentElement.setAttribute('data-theme', 'dark');
-    const dt = document.getElementById('dark-toggle');
-    if (dt) dt.checked = true;
-  }
-  if (SETTINGS.accent?.color) {
-    document.documentElement.style.setProperty('--acc',       SETTINGS.accent.color);
-    document.documentElement.style.setProperty('--acc2',      SETTINGS.accent.color2);
-    document.documentElement.style.setProperty('--acc-light', SETTINGS.accent.light || 'rgba(79,70,229,.12)');
-    document.documentElement.style.setProperty('--acc-glow',  SETTINGS.accent.light || 'rgba(79,70,229,.12)');
-  }
+  // Apply dark mode immediately
+  document.documentElement.setAttribute('data-theme', SETTINGS.dark ? 'dark' : 'light');
 
-  const ss  = document.getElementById('style-select');
-  const ls  = document.getElementById('length-select');
-  const st  = document.getElementById('save-toggle');
-  if (ss) ss.value = SETTINGS.style;
-  if (ls) ls.value = SETTINGS.length;
-  if (st) st.checked = SETTINGS.saveChats;
+  // Apply lang to html element
+  document.documentElement.lang = SETTINGS.lang;
+  document.documentElement.dir  = SETTINGS.lang === 'en' ? 'ltr' : 'rtl';
 }
 
-// ══════════════════════════════════════
-//  Sidebar
-// ══════════════════════════════════════
-function toggleSidebar() { document.getElementById('sidebar').classList.toggle('hidden'); }
-function closeSidebar()  { document.getElementById('sidebar').classList.add('hidden'); }
-
-// ══════════════════════════════════════
-//  مساعدات
-// ══════════════════════════════════════
-function handleKey(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }
-function autoResize(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 140) + 'px'; }
-function scrollDown() { const w = document.getElementById('messages-wrap'); setTimeout(() => w.scrollTo({ top: w.scrollHeight, behavior: 'smooth' }), 50); }
-function esc(t) { return (t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-
-// Apple Sign In
-function loginWithApple() {
-  // Apple Sign In requires Apple Developer account + registered domain
-  // For now show informational message
-  alert('تسجيل الدخول بـ Apple يتطلب ربط نطاق مخصص (Custom Domain) في Apple Developer Console.\n\nيمكنك استخدام Google أو المتابعة كزائر في الوقت الحالي.');
+// ════════════════════════════════════════
+//  SIDEBAR
+// ════════════════════════════════════════
+function toggleSidebar() {
+  const sb = document.getElementById('sidebar');
+  const ov = document.getElementById('sidebar-overlay');
+  const isHidden = sb.classList.toggle('hidden');
+  if (ov) ov.classList.toggle('active', !isHidden && window.innerWidth <= 640);
 }
 
-document.addEventListener('AppleIDSignInOnSuccess', (e) => {
-  const d = e.detail;
-  STATE.user = {
-    name: d.user ? `${d.user.name?.firstName||''} ${d.user.name?.lastName||''}`.trim() || 'Apple User' : 'Apple User',
-    email: d.user?.email || '',
-    photo: null,
-    type: 'apple'
-  };
-  localStorage.setItem('amerni_user', JSON.stringify(STATE.user));
-  enterApp();
-});
+function closeSidebar() {
+  document.getElementById('sidebar').classList.add('hidden');
+  const ov = document.getElementById('sidebar-overlay');
+  if (ov) ov.classList.remove('active');
+}
+
+// ════════════════════════════════════════
+//  UTILS
+// ════════════════════════════════════════
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 140) + 'px';
+}
+
+function scrollDown() {
+  const w = document.getElementById('msgs-wrap');
+  if (w) setTimeout(() => w.scrollTo({ top: w.scrollHeight, behavior: 'smooth' }), 50);
+}
+
+function esc(str) {
+  return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}

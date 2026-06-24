@@ -16,7 +16,7 @@ module.exports = async function handler(req, res) {
     const apiKey = process.env.GROQ_API_KEY;
     if (!apiKey) return res.status(200).json({ reply: '⚠️ GROQ_API_KEY غير موجود.' });
 
-    const { messages, length, userName, lang, memory } = req.body || {};
+    const { messages, length, style, userName, lang, memory } = req.body || {};
     if (!messages?.length) return res.status(400).json({ error: 'No messages' });
 
     const isEn = lang === 'en';
@@ -27,6 +27,15 @@ module.exports = async function handler(req, res) {
       long:   isEn ? 'Provide detailed, comprehensive responses.' : 'ردودك مفصّلة وشاملة مع الشرح الكافي.',
     };
 
+    const styleMap = {
+      formal: { ar: 'تجيب بالعربية الفصحى الرسمية الواضحة دائماً.', en: 'Always respond in formal, professional English.' },
+      saudi:  { ar: 'تجيب باللهجة السعودية العامية الواضحة (ليس فصحى)، مع الحفاظ على الأدب.', en: 'Always respond in formal English.' },
+      casual: { ar: 'تجيب بعربية بسيطة وودودة وسهلة الفهم.', en: 'Always respond in a friendly, casual English tone.' },
+    };
+    const styleInstruction = isEn
+      ? (styleMap[style]?.en || styleMap.formal.en)
+      : (styleMap[style]?.ar || styleMap.formal.ar);
+
     const memoryBlock = memory?.trim()
       ? (isEn ? `## About the user:\n${memory}\n` : `## معلومات عن المستخدم:\n${memory}\n`)
       : '';
@@ -35,7 +44,7 @@ module.exports = async function handler(req, res) {
       ? `You are "Amerni" (آمرني), an advanced AI assistant specialized in creating professional files.
 
 ## Core Rules:
-1. Always respond in formal professional English only — unless the user requests another language or code.
+1. ${styleInstruction}
 2. Your name is "Amerni". Never mention Groq, Meta, Llama, or underlying technology.
 3. Zero spelling or grammar mistakes.
 4. Use Markdown formatting when helpful.
@@ -78,7 +87,7 @@ If the user asks for a file, ALWAYS generate the content and include the %%%GENE
       : `أنت "آمرني"، مساعد ذكاء اصطناعي متطور متخصص في إنشاء الملفات الاحترافية.
 
 ## قواعد صارمة:
-1. تجيب دائماً بالعربية الفصحى الواضحة — ممنوع أي لغة أخرى إلا عند طلب الترجمة أو الكود.
+1. ${styleInstruction}
 2. اسمك "آمرني" فقط. لا تذكر Groq أو Meta أو Llama.
 3. ردودك خالية تماماً من الأخطاء الإملائية والنحوية.
 4. استخدم Markdown بشكل صحيح عند الحاجة.
