@@ -654,7 +654,8 @@ function clearAllChats() {
 //  SETTINGS
 // ════════════════════════════════════════
 function openSettings() {
-  document.getElementById('settings-backdrop').style.display = 'flex';
+  const el = document.getElementById('settings-backdrop');
+  el.style.display = 'flex';
   // Load memory text
   const mem = document.getElementById('memory-input');
   if (mem) mem.value = localStorage.getItem('amerni_memory') || '';
@@ -674,11 +675,12 @@ function openSettings() {
 }
 
 function closeSettings() {
-  document.getElementById('settings-backdrop').style.display = 'none';
+  const el = document.getElementById('settings-backdrop');
+  if (el) el.style.display = 'none';
 }
 
 function closeSettingsBackdrop(e) {
-  if (e.target === document.getElementById('settings-backdrop')) closeSettings();
+  // No-op: full page, no outside click to close
 }
 
 function saveMemory() {
@@ -750,6 +752,7 @@ function applyLang(reloadHistory = true) {
     'txt-delete-all':     t('deleteAll'),
     'txt-lbl-about':      t('lbl_about'),
     'txt-about-ver':      t('aboutVer'),
+    'txt-back':           SETTINGS.lang === 'en' ? 'Back' : 'رجوع',
   };
 
   Object.entries(elMap).forEach(([id, text]) => {
