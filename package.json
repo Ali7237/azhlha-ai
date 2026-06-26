@@ -1,11 +1,21 @@
 {
   "name": "amerni-ai",
-  "version": "8.1.0",
+  "version": "8.2.0",
   "type": "commonjs",
-  "description": "آمرني — AI Assistant with Professional File Generation",
+  "description": "Amerni AI assistant with chat and professional file generation",
+  "scripts": {
+    "dev": "vercel dev",
+    "check": "node --check app.js && node --check api/chat.js && node --check api/generate.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
   "dependencies": {
     "docx": "^8.5.0",
     "exceljs": "^4.4.0",
     "pptxgenjs": "^3.12.0"
+  },
+  "devDependencies": {
+    "vercel": "^34.0.0"
   }
 }

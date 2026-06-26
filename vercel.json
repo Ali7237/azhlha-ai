@@ -1,6 +1,11 @@
 {
   "functions": {
-    "api/chat.js": { "maxDuration": 30 },
-    "api/generate.js": { "maxDuration": 60, "memory": 1024 }
+    "api/chat.js": {
+      "maxDuration": 30
+    },
+    "api/generate.js": {
+      "maxDuration": 60,
+      "memory": 1024
+    }
   }
 }
